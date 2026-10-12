@@ -58,6 +58,10 @@ namespace RageLightEditor.Shell
         private StackPanel detailRows;
         private TextBlock dirtyText, folderText, editStatus;
         private ShellButton_U27 bSaveYmaps, bDiscard;
+        private TextBlock modelsHead, modelsStatus;
+        private StackPanel modelsList, modelsBlock;
+        private ShellButton_U27 bSaveModels;
+        private string modelsSig;
 
         private static readonly IBrush FieldBg = new SolidColorBrush(Color.Parse("#0A0B0D"));
 
@@ -397,7 +401,20 @@ namespace RageLightEditor.Shell
             var btnRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
             btnRow.Children.Add(bSaveYmaps);
             btnRow.Children.Add(bDiscard);
+            modelsHead = new TextBlock { Foreground = ShellTheme_U27.Dim, FontSize = 12 };
+            ToolTip.SetTip(modelsHead, "Every .ydr / .yft whose lights you changed in the world. Save them one by one, or all at once.");
+            modelsList = new StackPanel { Spacing = 2 };
+            bSaveModels = new ShellButton_U27(ShellIcons_U27.Save, "Save all models", "Writes every unsaved model. A model saved before goes back to its own file; the others go to the output folder.", 15)
+            { Height = 28, BaseBackground = ShellTheme_U27.AccentSoft, HorizontalAlignment = HorizontalAlignment.Left };
+            bSaveModels.Click += () => Act(() => P.RequestSaveEditedModels_U32 = true);
+            modelsStatus = new TextBlock { Foreground = ShellTheme_U27.Dim, FontSize = 11, TextWrapping = TextWrapping.Wrap };
+            modelsBlock = new StackPanel { Spacing = 4, IsVisible = false, Margin = new Thickness(0, 0, 0, 6) };
+            modelsBlock.Children.Add(modelsHead);
+            modelsBlock.Children.Add(new ScrollViewer { Content = modelsList, MaxHeight = 150 });
+            modelsBlock.Children.Add(bSaveModels);
+            modelsBlock.Children.Add(modelsStatus);
             var st = new StackPanel { Margin = new Thickness(10, 6), Spacing = 4 };
+            st.Children.Add(modelsBlock);
             st.Children.Add(dirtyText);
             st.Children.Add(btnRow);
             st.Children.Add(folderRow);
@@ -524,6 +541,7 @@ namespace RageLightEditor.Shell
                 if (detailsPane.IsVisible) FillDetails(e);
             }
 
+            SyncEditedModels_U32(p);
             int dirty = p.WorldDirtyCount;
             dirtyText.IsVisible = dirty > 0;
             dirtyText.Text = $"{dirty} ymap{(dirty == 1 ? "" : "s")} edited";
@@ -653,6 +671,44 @@ namespace RageLightEditor.Shell
                 }
                 finally { syncingTree = false; }
                 return;
+            }
+        }
+
+        private void SyncEditedModels_U32(LightPanel p)
+        {
+            var list = p.WorldEditedModels_U32;
+            modelsBlock.IsVisible = list.Count > 0;
+            if (list.Count == 0) { modelsSig = null; return; }
+            var sb = new System.Text.StringBuilder();
+            foreach (var m in list) sb.Append(m.Hash).Append(m.Unsaved ? '*' : '-').Append(m.CanSave ? '1' : '0').Append(m.SavedPath).Append('|');
+            string sig = sb.ToString();
+            string status = p.WorldEditedModelsStatus_U32 ?? "";
+            modelsStatus.IsVisible = status.Length > 0;
+            if (modelsStatus.Text != status) modelsStatus.Text = status;
+            if (sig == modelsSig) return;
+            modelsSig = sig;
+            int unsaved = p.WorldEditedModelsUnsaved_U32;
+            modelsHead.Text = $"Edited models ({list.Count})";
+            bSaveModels.Text = unsaved > 0 ? $"Save all models ({unsaved})" : "Save all models";
+            bSaveModels.Enabled = unsaved > 0;
+            modelsList.Children.Clear();
+            foreach (var m in list)
+            {
+                var save = new ShellButton_U27(ShellIcons_U27.Save, "Save", m.CanSave ? "Save this model" : "This model cannot be written as a loose file", 13) { Height = 24, Enabled = m.Unsaved && m.CanSave };
+                uint hash = m.Hash;
+                save.Click += () => Act(() => P.RequestSaveEditedModel_U32 = hash);
+                var name = new TextBlock
+                {
+                    Text = m.FileName + (m.Unsaved ? "  *" : ""),
+                    Foreground = m.Unsaved ? ShellTheme_U27.Warn : ShellTheme_U27.Dim,
+                    FontSize = 12, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis,
+                };
+                ToolTip.SetTip(name, (m.Unsaved ? "Unsaved light changes" : "Saved") + (string.IsNullOrEmpty(m.SavedPath) ? "" : "\n" + m.SavedPath));
+                var row = new DockPanel();
+                DockPanel.SetDock(save, Dock.Right);
+                row.Children.Add(save);
+                row.Children.Add(name);
+                modelsList.Children.Add(row);
             }
         }
 

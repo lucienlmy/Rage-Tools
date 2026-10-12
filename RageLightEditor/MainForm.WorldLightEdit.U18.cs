@@ -28,10 +28,10 @@ namespace RageLightEditor
             int index = WorldLights.AppendLight_U18(db, la);
             if (index < 0) { WorldEdit.LastStatus = "could not add a light to this model"; return; }
             worldLightArchOf[la] = hash;
-            worldLightUnsaved.Add(hash);
+            MarkLightUnsaved_U32(hash);
             worldRender.Lights.Invalidate(hash);
             WorldHistory.Push(new DelegateCommand("Add light",
-                () => { if (WorldLights.InsertLightAt_U18(db, la, index) >= 0) { worldLightUnsaved.Add(hash); worldRender.Lights.Invalidate(hash); } },
+                () => { if (WorldLights.InsertLightAt_U18(db, la, index) >= 0) { MarkLightUnsaved_U32(hash); worldRender.Lights.Invalidate(hash); } },
                 () => { WorldLights.RemoveLight_U18(db, la); worldRender.Lights.Invalidate(hash); if (ReferenceEquals(WorldEdit.Selection.Light, la)) WorldEdit.Deselect(); }));
             panel.SetEditLight(true);
             if (!WorldSelectLight(e, index, "added")) WorldEdit.LastStatus = "light added";
@@ -47,7 +47,7 @@ namespace RageLightEditor
             LightPresets_V20.Apply_V20(pr, l);
             var after = Scene.CloneLight(l);
             worldRender.Lights.Invalidate(hash);
-            if (hash != 0) worldLightUnsaved.Add(hash);
+            if (hash != 0) MarkLightUnsaved_U32(hash);
             WorldHistory.Push(new SnapshotCommand<LightAttributes>("Light preset", l, before, after,
                 st => { WorldLights.CopyAllInto(st, l); worldRender.Lights.Invalidate(ArchOfLight(l)); }));
             panel.WorldLightStatus = "preset '" + pr.Name + "' applied";

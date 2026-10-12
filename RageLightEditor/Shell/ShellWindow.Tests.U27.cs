@@ -157,6 +157,32 @@ namespace RageLightEditor.Shell
 
                 string snapDir = Path.GetDirectoryName(outPath);
                 Check("right column shown in World", rightHeader.IsVisible && rightColumn.Width.Value > 0);
+                {
+                    string mdir = Path.Combine(Path.GetTempPath(), "rle_u32_shell");
+                    Directory.CreateDirectory(mdir);
+                    string msrc = Path.Combine(mdir, "src.ydr");
+                    TestSceneGenerator.Run(msrc);
+                    var my = new YdrFile(); my.Load(File.ReadAllBytes(msrc));
+                    uint mh = JenkHash.GenHash("rle_u32_shell_lamp");
+                    Check("no edited models listed to begin with", !modelsBlock.IsVisible);
+                    form.MarkEditedForTest_U32(mh, my.Drawable, "rle_u32_shell_lamp"); await Frames(600);
+                    var mrow = modelsList.Children.OfType<DockPanel>().FirstOrDefault();
+                    var mname = mrow?.Children.OfType<TextBlock>().FirstOrDefault();
+                    var msave = mrow?.Children.OfType<ShellButton_U27>().FirstOrDefault();
+                    Check("an edited model is listed with its file name, unsaved",
+                          modelsBlock.IsVisible && modelsList.Children.Count == 1 && (mname?.Text ?? "").StartsWith("rle_u32_shell_lamp.ydr") && (mname?.Text ?? "").EndsWith("*") && msave != null && msave.Enabled,
+                          mname?.Text ?? "no row");
+                    Check("Save all models counts it", bSaveModels.Enabled && bSaveModels.Text == "Save all models (1)", bSaveModels.Text);
+                    Snap_U27(Path.Combine(snapDir, "shell_edited_models.png"));
+                    int saved = form.SaveEditedModels_U32(mdir); await Frames(600);
+                    mname = modelsList.Children.OfType<DockPanel>().FirstOrDefault()?.Children.OfType<TextBlock>().FirstOrDefault();
+                    Check("after saving, the row shows it saved and Save all is done",
+                          saved == 1 && File.Exists(Path.Combine(mdir, "rle_u32_shell_lamp.ydr")) && mname?.Text == "rle_u32_shell_lamp.ydr" && !bSaveModels.Enabled,
+                          $"saved {saved}, row '{mname?.Text}'");
+                    form.ForgetEdited_U32(mh); await Frames(600);
+                    Check("the list goes away when nothing is edited", !modelsBlock.IsVisible);
+                    try { Directory.Delete(mdir, true); } catch { }
+                }
                 p.RequestWorldDeselect = true; await Frames(600);
                 Check("inspector is native with nothing selected", rightBody.IsVisible && !p.ShellRightImGui_U27 && noSelNote.IsVisible);
                 for (int i = 0; i < 40 && tree.Items.Count == 0; i++) { treeTick = 0; await Frames(500); }

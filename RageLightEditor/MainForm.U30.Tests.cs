@@ -13,6 +13,7 @@ namespace RageLightEditor
             InteriorProjectPropTest_U30(check);
             MloDupArchetypeTest_U31(check);
             CinematicEverywhereTest_U31(check);
+            EditedModelsTest_U32(check);
         }
 
         private void CinematicEverywhereTest_U31(Action<string, bool, string> check)

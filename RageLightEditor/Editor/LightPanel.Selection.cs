@@ -213,7 +213,7 @@ namespace RageLightEditor.Editor
             }
 
             DrawCollisionUnderCursor_Selection();
-            if (WorldDirtyCount > 0) DrawWorldSaveRow();
+            if (WorldDirtyCount > 0 || WorldEditedModels_U32.Count > 0) DrawWorldSaveRow();
         }
 
         private void DrawMloInstanceHeader(YmapEntityDef mlo)

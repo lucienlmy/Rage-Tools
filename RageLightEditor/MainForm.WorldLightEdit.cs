@@ -71,7 +71,7 @@ namespace RageLightEditor
                 {
                     uint hash = ArchOfLight(key);
                     worldRender.Lights.Invalidate(hash);
-                    if (hash != 0) worldLightUnsaved.Add(hash);
+                    if (hash != 0) MarkLightUnsaved_U32(hash);
                     WorldEdit.LastStatus = "light edited (" + (worldRender.Lights.GetDrawable(hash) != null ? "live in the world" : "not resident") + ")";
                     WorldHistory.Push(new SnapshotCommand<LightAttributes>("Edit light", key, before, after,
                         st => { WorldLights.CopyAllInto(st, key); worldRender.Lights.Invalidate(ArchOfLight(key)); }));
@@ -79,6 +79,8 @@ namespace RageLightEditor
             }
             if (panel.RequestWorldLightSaveAs) { panel.RequestWorldLightSaveAs = false; WorldLightSaveAs(false); }
             if (panel.RequestWorldLightAddToProject) { panel.RequestWorldLightAddToProject = false; WorldLightSaveAs(true); }
+            ServiceEditedModels_U32();
+            ServiceEditedModelsProbe_U32();
 
             if (!worldLightDumpDone && worldBuilt && screenshotPath != null && worldWarmup >= 455 && Environment.GetEnvironmentVariable("RLE_DUMPLIGHTS") == "1")
             {
@@ -320,7 +322,7 @@ namespace RageLightEditor
         {
             uint hash = ArchOfLight(la);
             if (hash == 0 && t is SelectionGizmoTarget sgt) hash = sgt.Selection.LightEntity?.Archetype?.Hash ?? 0;
-            if (hash != 0) { worldRender.Lights.Invalidate(hash); worldLightUnsaved.Add(hash); }
+            if (hash != 0) { worldRender.Lights.Invalidate(hash); MarkLightUnsaved_U32(hash); }
             WorldEdit.LastStatus = "light moved (live in the world)";
         }
 
@@ -447,7 +449,7 @@ namespace RageLightEditor
             if (valueEdit)
             {
                 worldRender.Lights.Invalidate(hash);
-                if (hash != 0) worldLightUnsaved.Add(hash);
+                if (hash != 0) MarkLightUnsaved_U32(hash);
                 WorldHistory.Push(new SnapshotCommand<LightAttributes>("Edit light", l, before, Scene.CloneLight(l),
                     st => { WorldLights.CopyAllInto(st, l); worldRender.Lights.Invalidate(ArchOfLight(l)); }));
             }

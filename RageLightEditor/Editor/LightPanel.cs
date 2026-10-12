@@ -2013,7 +2013,7 @@ namespace RageLightEditor.Editor
                 DrawWorldNoSelectionHint_J2(ref hinted);
                 if (!hinted) ImGui.TextWrapped("Right-click anything in the world to select it.");
                 DrawCollisionUnderCursor_Selection();
-                if (WorldDirtyCount > 0) DrawWorldSaveRow();
+                if (WorldDirtyCount > 0 || WorldEditedModels_U32.Count > 0) DrawWorldSaveRow();
                 return;
             }
 
@@ -2069,6 +2069,7 @@ namespace RageLightEditor.Editor
 
         private void DrawWorldSaveRow()
         {
+            DrawWorldEditedModels_U32();
             ImGui.Spacing();
             if (WorldDirtyCount > 0)
                 ImGui.TextColored(UiTheme.Warn,

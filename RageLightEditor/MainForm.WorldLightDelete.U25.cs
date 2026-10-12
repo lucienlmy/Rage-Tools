@@ -20,19 +20,19 @@ namespace RageLightEditor
             int index = items == null ? -1 : Array.IndexOf(items, la);
             if (index < 0 || !WorldLights.RemoveLight_U18(db, la)) { WorldEdit.LastStatus = "could not delete that light"; return true; }
             string owner = s.LightEntity?.Archetype?.Name.ToString() ?? "the prop";
-            worldLightUnsaved.Add(hash);
+            MarkLightUnsaved_U32(hash);
             worldRender.Lights.Invalidate(hash);
             WorldEdit.Deselect();
             WorldEdit.LastStatus = $"light deleted from {owner} - Save as... or Add to project keeps it";
             WorldHistory.Push(new DelegateCommand("Delete light",
                 () =>
                 {
-                    if (WorldLights.RemoveLight_U18(db, la)) { worldLightUnsaved.Add(hash); worldRender.Lights.Invalidate(hash); }
+                    if (WorldLights.RemoveLight_U18(db, la)) { MarkLightUnsaved_U32(hash); worldRender.Lights.Invalidate(hash); }
                     if (ReferenceEquals(WorldEdit.Selection.Light, la)) WorldEdit.Deselect();
                 },
                 () =>
                 {
-                    if (WorldLights.InsertLightAt_U18(db, la, index) >= 0) { worldLightUnsaved.Add(hash); worldRender.Lights.Invalidate(hash); }
+                    if (WorldLights.InsertLightAt_U18(db, la, index) >= 0) { MarkLightUnsaved_U32(hash); worldRender.Lights.Invalidate(hash); }
                 }));
             return true;
         }

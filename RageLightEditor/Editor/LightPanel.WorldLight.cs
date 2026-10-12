@@ -137,7 +137,7 @@ namespace RageLightEditor.Editor
             if (!string.IsNullOrEmpty(WorldLightStatus)) ImGui.TextWrapped(WorldLightStatus);
 
             DrawCollisionUnderCursor_Selection();
-            if (WorldDirtyCount > 0) DrawWorldSaveRow();
+            if (WorldDirtyCount > 0 || WorldEditedModels_U32.Count > 0) DrawWorldSaveRow();
         }
 
         private void DrawEntityLightsList_WorldLight(YmapEntityDef e, int selectedIndex = -1)
