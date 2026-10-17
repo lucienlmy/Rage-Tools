@@ -2040,6 +2040,8 @@ namespace RageLightEditor
         {
             paths = paths?.Where(p => !string.IsNullOrEmpty(p) && File.Exists(p)).ToArray();
             if (paths == null || paths.Length == 0) return;
+            paths = SplitPropLibraries_U33(paths, out var propLibraries);
+            UsePropLibraries_U33(propLibraries);
             try
             {
                 Cursor = Cursors.WaitCursor;
@@ -2142,7 +2144,9 @@ namespace RageLightEditor
                 panel.MloStatus = $"Imported {result.Placed}/{result.EntityCount} " +
                     $"from {paths.Length} file(s) in {result.Seconds:0.00}s\n" +
                     $"Scene now: {scene.Files.Count(f => f.FromMlo)} light props, {scene.Lights.Count} lights" +
-                    (skipped.Count > 0 ? $"\nskipped: {string.Join("; ", skipped.Take(2))}" : "");
+                    (skipped.Count > 0 ? $"\nskipped: {string.Join("; ", skipped.Take(2))}" : "") +
+                    (propLibraries.Count > 0 ? $"\n{propLibraries.Count} prop library .ytyp used for the props only: {string.Join(", ", propLibraries.Select(Path.GetFileName))}" : "");
+                if (propLibraries.Count > 0) Console.WriteLine($"MLOLIBS {propLibraries.Count} prop library .ytyp used for the props only: {string.Join(", ", propLibraries.Select(Path.GetFileName))}");
                 if (wasEmpty) FrameMlo(result, model);
             }
             catch (Exception ex)
@@ -2155,6 +2159,7 @@ namespace RageLightEditor
                 try { importProgress?.Close(); importProgress?.Dispose(); } catch { }
                 importProgress = null;
                 Cursor = Cursors.Default;
+                RestorePropLibraries_U33();
             }
         }
 

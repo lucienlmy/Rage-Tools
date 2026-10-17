@@ -14,6 +14,7 @@ namespace RageLightEditor
             MloDupArchetypeTest_U31(check);
             CinematicEverywhereTest_U31(check);
             EditedModelsTest_U32(check);
+            MloLibrariesTest_U33(check);
         }
 
         private void CinematicEverywhereTest_U31(Action<string, bool, string> check)
