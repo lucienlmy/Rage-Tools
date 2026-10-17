@@ -5691,7 +5691,7 @@ namespace RageLightEditor.Editor
             if (Header("Culling plane", true))
             {
                 bool en = (l.Flags & LightDefs.FlagCullingPlane) != 0;
-                if (ImGui.Checkbox("Culling plane", ref en))
+                if (ImGui.Checkbox("Culling plane##cullon", ref en))
                 {
                     scene.PushUndo();
                     if (en) l.Flags |= LightDefs.FlagCullingPlane; else l.Flags &= ~LightDefs.FlagCullingPlane;
@@ -5819,7 +5819,7 @@ namespace RageLightEditor.Editor
             {
                 uint flags = l.Flags;
                 string fnum = flags.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                if (ImGui.InputText("Flags", ref fnum, 16, ImGuiInputTextFlags.CharsDecimal | ImGuiInputTextFlags.EnterReturnsTrue))
+                if (ImGui.InputText("Flags##flagnum", ref fnum, 16, ImGuiInputTextFlags.CharsDecimal | ImGuiInputTextFlags.EnterReturnsTrue))
                 {
                     if (uint.TryParse(fnum, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var nf))
                     {
