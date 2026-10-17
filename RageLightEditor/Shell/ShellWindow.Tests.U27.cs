@@ -71,12 +71,14 @@ namespace RageLightEditor.Shell
                 ShellButton_U27 Tab(Space s) { foreach (var t in tabs) if (t.space == s) return t.btn; return null; }
                 Tab(Ws("Lights")).PerformClick(); await Frames();
                 Check("tab switches to Lights", p.Workspace == Space.Light, p.Workspace.ToString());
+                Snap_U27(Path.Combine(Path.GetDirectoryName(outPath), "shell_lights.png"));
                 Check("world tools hidden outside World", !worldTools.IsVisible && !paletteArea.IsVisible);
                 Tab(Space.World).PerformClick(); await Frames();
                 Check("tab switches back to World", p.Workspace == Space.World, p.Workspace.ToString());
                 Check("world tools shown in World, pick palette closed until asked for", worldTools.IsVisible && !paletteArea.IsVisible);
                 bPicks.PerformClick(); await Frames();
                 Check("the Picks button opens the palette", paletteArea.IsVisible && bPicks.IsOn);
+                Snap_U27(Path.Combine(Path.GetDirectoryName(outPath), "shell_palette.png"));
                 Check("World tab is lit", Tab(Space.World).IsOn && !Tab(Space.Light).IsOn);
 
                 var g = p.WorldGizmo;

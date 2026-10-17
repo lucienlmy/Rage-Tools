@@ -37,7 +37,8 @@ namespace RageLightEditor.Shell
         private ShellButton_U27 bSelect, bMove, bRotate, bScale, bAxes, bSnapDown, bSnapUp, bSnap, bUndo, bRedo,
             bPick, bFrame, bProject, bEditLight, bSave, bOutput;
         private Control viewportArea, worldTools, topArea, toolbarArea, paletteArea, outputArea, statusArea;
-        private TextBlock docName, statusLeft, statusRight, outputCount;
+        private TextBlock docName, statusLeft, statusRight, outputCount, viewTitle;
+        private Control viewHeader;
         private SelectableTextBlock outputText;
         private ScrollViewer outputScroll;
         private ShellButton_U27 outTabAll, outTabErrors;
@@ -71,9 +72,14 @@ namespace RageLightEditor.Shell
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
                 Background = ShellTheme_U27.Window,
                 FontFamily = ShellTheme_U27.Font,
-                FontSize = 13,
+                FontSize = 12,
                 Foreground = ShellTheme_U27.Text,
             };
+            Window.Resources["ControlCornerRadius"] = new CornerRadius(2);
+            Window.Styles.Add(new Avalonia.Styling.Style(x => Avalonia.Styling.Selectors.OfType<TreeViewItem>(x))
+            {
+                Setters = { new Avalonia.Styling.Setter(TreeViewItem.MinHeightProperty, 22.0) },
+            });
             try
             {
                 using var ms = new MemoryStream();
@@ -89,11 +95,17 @@ namespace RageLightEditor.Shell
             outputArea = BuildOutput();
             statusArea = BuildStatus();
 
-            viewportArea = new Avalonia.Controls.Border
+            viewTitle = new TextBlock { Text = "Viewport" };
+            viewHeader = ShellTheme_U27.PanelTitle(ShellIcons_U27.Monitor, ShellTheme_U27.IconCyan, viewTitle);
+            var viewDock = new DockPanel();
+            DockPanel.SetDock(viewHeader, Dock.Top);
+            viewDock.Children.Add(viewHeader);
+            viewDock.Children.Add(new Avalonia.Controls.Border
             {
                 Background = Brushes.Black,
                 Child = new ViewportHost_U27(form),
-            };
+            });
+            viewportArea = viewDock;
             BuildRight_U27();
 
             var grid = new Grid
@@ -159,7 +171,7 @@ namespace RageLightEditor.Shell
         private void SetFullscreen(bool on)
         {
             fullscreen = on;
-            topArea.IsVisible = toolbarArea.IsVisible = statusArea.IsVisible = !on;
+            topArea.IsVisible = toolbarArea.IsVisible = statusArea.IsVisible = viewHeader.IsVisible = !on;
             if (on) paletteArea.IsVisible = false;
             if (on) { preFullscreen = Window.WindowState; Window.WindowState = WindowState.FullScreen; }
             else Window.WindowState = preFullscreen == WindowState.FullScreen ? WindowState.Normal : preFullscreen;
@@ -182,14 +194,14 @@ namespace RageLightEditor.Shell
             {
                 Text = "RAGE Tools",
                 FontWeight = FontWeight.SemiBold,
-                FontSize = 14,
+                FontSize = 13,
                 Foreground = Brushes.White,
                 VerticalAlignment = VerticalAlignment.Center,
             };
             var brandVersion = new TextBlock
             {
                 Text = AppVersion_U30.Version,
-                FontSize = 11,
+                FontSize = 10.5,
                 Foreground = ShellTheme_U27.Faint,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(6, 2, 0, 0),
@@ -202,7 +214,7 @@ namespace RageLightEditor.Shell
             var tabStrip = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 0, Margin = new Thickness(12, 0, 0, 0) };
             foreach (var (space, label) in TabNames)
             {
-                var b = new ShellButton_U27(null, label, null, underline: true) { Padding = new Thickness(12, 0), MinHeight = 38 };
+                var b = new ShellButton_U27(null, label, null, underline: true) { Padding = new Thickness(11, 0), MinHeight = 32 };
                 var sp = space;
                 b.Click += () => Act(() => P.SwitchWorkspace(sp));
                 tabs.Add((space, b));
@@ -237,30 +249,30 @@ namespace RageLightEditor.Shell
                 Background = ShellTheme_U27.Window,
                 BorderBrush = ShellTheme_U27.Border,
                 BorderThickness = new Thickness(0, 0, 0, 1),
-                Height = 40,
+                Height = 34,
                 Child = row,
             };
         }
 
-        private ShellButton_U27 Tool(string icon, string tip, Action click, string text = null)
+        private ShellButton_U27 Tool(string icon, string tip, Action click, string text = null, IBrush colour = null)
         {
-            var b = new ShellButton_U27(icon, text, tip, 18) { Margin = new Thickness(1, 0), MinWidth = 32, Height = 32 };
+            var b = new ShellButton_U27(icon, text, tip, 16) { Margin = new Thickness(0), MinWidth = 28, Height = 28, IconColour = colour };
             b.Click += () => Act(click);
             return b;
         }
 
         private Control BuildToolbar()
         {
-            var bar = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 2, Margin = new Thickness(8, 0), VerticalAlignment = VerticalAlignment.Center };
-            bar.Children.Add(Tool(ShellIcons_U27.Open, "Open...", () => P.ShellCommand_U27("open")));
-            bar.Children.Add(bSave = Tool(ShellIcons_U27.Save, "Save  (Ctrl+S)", () => P.ShellCommand_U27("save")));
+            var bar = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 1, Margin = new Thickness(6, 0), VerticalAlignment = VerticalAlignment.Center };
+            bar.Children.Add(Tool(ShellIcons_U27.Open, "Open...", () => P.ShellCommand_U27("open"), null, ShellTheme_U27.IconAmber));
+            bar.Children.Add(bSave = Tool(ShellIcons_U27.Save, "Save  (Ctrl+S)", () => P.ShellCommand_U27("save"), null, ShellTheme_U27.Blue));
             bar.Children.Add(ShellTheme_U27.Divider(true));
             bar.Children.Add(bUndo = Tool(ShellIcons_U27.Undo, "Undo  (Ctrl+Z)", () => P.ShellCommand_U27("undo")));
             bar.Children.Add(bRedo = Tool(ShellIcons_U27.Redo, "Redo  (Ctrl+Y)", () => P.ShellCommand_U27("redo")));
 
-            var world = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 2 };
+            var world = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 1 };
             world.Children.Add(ShellTheme_U27.Divider(true));
-            world.Children.Add(bPicks = Tool(ShellIcons_U27.Pick, "Show or hide the pick palette  (M cycles what a click picks)", () => paletteWanted = !paletteWanted, "Picks: Entity"));
+            world.Children.Add(bPicks = Tool(ShellIcons_U27.Pick, "Show or hide the pick palette  (M cycles what a click picks)", () => paletteWanted = !paletteWanted, "Picks: Entity", ShellTheme_U27.IconCyan));
             world.Children.Add(ShellTheme_U27.Divider(true));
             world.Children.Add(bSelect = Tool(ShellIcons_U27.Select, "Select  (Q)", () => SetGizmo(WorldGizmoMode.Select)));
             world.Children.Add(bMove = Tool(ShellIcons_U27.Move, "Move  (W)", () => SetGizmo(WorldGizmoMode.Translate)));
@@ -271,30 +283,30 @@ namespace RageLightEditor.Shell
             {
                 var g = P.WorldGizmo; if (g == null) return;
                 g.Space = g.Space == WorldGizmoSpace.Local ? WorldGizmoSpace.World : WorldGizmoSpace.Local;
-            }, "World"));
+            }, "World", ShellTheme_U27.IconCyan));
             world.Children.Add(bSnapDown = Tool(ShellIcons_U27.Minus, "Smaller rotate steps", () =>
             {
                 var g = P.WorldGizmo; if (g != null) g.RotateSnapDeg = RotateSnapSteps_U5.Down(g.RotateSnapDeg);
             }));
-            world.Children.Add(bSnap = new ShellButton_U27(ShellIcons_U27.Magnet, "Snap: off", "Turning snaps to steps this big.\nHold Shift while dragging a ring to turn freely.") { Height = 32, Cursor = Cursor.Default });
+            world.Children.Add(bSnap = new ShellButton_U27(ShellIcons_U27.Magnet, "Snap: off", "Turning snaps to steps this big.\nHold Shift while dragging a ring to turn freely.", 16) { Height = 28, Cursor = Cursor.Default, IconColour = ShellTheme_U27.IconRed });
             world.Children.Add(bSnapUp = Tool(ShellIcons_U27.Plus, "Bigger rotate steps", () =>
             {
                 var g = P.WorldGizmo; if (g != null) g.RotateSnapDeg = RotateSnapSteps_U5.Up(g.RotateSnapDeg);
             }));
             world.Children.Add(ShellTheme_U27.Divider(true));
-            world.Children.Add(bPick = Tool(ShellIcons_U27.Pick, "Picking: clicking in the world changes the selection  (C)", () => P.MouseSelectEnabled = !P.MouseSelectEnabled, "Picking"));
+            world.Children.Add(bPick = Tool(ShellIcons_U27.Pick, "Picking: clicking in the world changes the selection  (C)", () => P.MouseSelectEnabled = !P.MouseSelectEnabled, "Picking", ShellTheme_U27.IconGreen));
             world.Children.Add(bFrame = Tool(ShellIcons_U27.Frame, "Fly the camera to what is selected  (F)", () => P.ShellCommand_U27("frame"), "Frame"));
-            world.Children.Add(bEditLight = Tool(ShellIcons_U27.Bulb, "Edit the props' lights where they stand", () => P.SetEditLight(!P.EditLightActive), "Edit Light"));
+            world.Children.Add(bEditLight = Tool(ShellIcons_U27.Bulb, "Edit the props' lights where they stand", () => P.SetEditLight(!P.EditLightActive), "Edit Light", ShellTheme_U27.IconYellow));
             world.Children.Add(ShellTheme_U27.Divider(true));
             world.Children.Add(bProject = Tool(ShellIcons_U27.Project, "Show or hide the map project", () =>
             {
                 var pw = P.ProjectWindow; if (pw != null) pw.Visible = !pw.Visible;
-            }, "Project"));
+            }, "Project", ShellTheme_U27.IconAmber));
             worldTools = world;
             bar.Children.Add(world);
 
             bPanel = Tool(ShellIcons_U27.PanelRight, "Show or hide the right panel  (F10)", () => P.ShowRightPanel = !P.ShowRightPanel);
-            bPanel.Margin = new Thickness(0, 0, 10, 0);
+            bPanel.Margin = new Thickness(0, 0, 6, 0);
             bPanel.VerticalAlignment = VerticalAlignment.Center;
             var row = new DockPanel();
             DockPanel.SetDock(bPanel, Dock.Right);
@@ -311,7 +323,7 @@ namespace RageLightEditor.Shell
                 Background = ShellTheme_U27.Panel,
                 BorderBrush = ShellTheme_U27.Border,
                 BorderThickness = new Thickness(0, 0, 0, 1),
-                Height = 58,
+                Height = 40,
                 Child = row,
             };
         }
@@ -324,42 +336,32 @@ namespace RageLightEditor.Shell
 
         private Control BuildPalette()
         {
-            var grid = new Avalonia.Controls.Primitives.UniformGrid { Columns = 2, Margin = new Thickness(6) };
+            var grid = new Avalonia.Controls.Primitives.UniformGrid { Columns = 2, Margin = new Thickness(4), VerticalAlignment = VerticalAlignment.Top };
             for (int i = 0; i < LightPanel.SelectionModeNames.Length; i++)
             {
                 if (!LightPanel.SelectionModeAvailable[i]) continue;
                 var b = new ShellButton_U27(ShellIcons_U27.Modes[i], ShellIcons_U27.ModeLabels[i],
-                    "Picks: " + LightPanel.SelectionModeNames[i], 22, vertical: true)
-                { Margin = new Thickness(2), Height = 60 };
+                    "Picks: " + LightPanel.SelectionModeNames[i], 20, vertical: true)
+                { Margin = new Thickness(1), Height = 52, IconColour = ShellIcons_U27.ModeColours[i] };
                 int mode = i;
                 b.Click += () => Act(() => P.SelectionMode = mode);
                 tiles.Add((i, b));
                 grid.Children.Add(b);
             }
-            var head = new TextBlock
-            {
-                Text = "PICK",
-                FontSize = 11,
-                FontWeight = FontWeight.SemiBold,
-                Foreground = ShellTheme_U27.Faint,
-                Margin = new Thickness(12, 10, 0, 0),
-            };
-            var close = new ShellButton_U27(ShellIcons_U27.Close, null, "Close the pick palette", 14) { Height = 24, Margin = new Thickness(0, 6, 6, 0) };
+            var close = new ShellButton_U27(ShellIcons_U27.Close, null, "Close the pick palette", 12) { Height = 22 };
             close.Click += () => { paletteWanted = false; Sync(); form.FocusViewport_U27(); };
-            var headRow = new DockPanel();
-            DockPanel.SetDock(close, Dock.Right);
-            headRow.Children.Add(close);
-            headRow.Children.Add(head);
-            var stack = new StackPanel();
-            stack.Children.Add(headRow);
-            stack.Children.Add(grid);
+            var headRow = ShellTheme_U27.PanelTitle(ShellIcons_U27.Pick, ShellTheme_U27.IconCyan, new TextBlock { Text = "Pick" }, close);
+            var dock = new DockPanel();
+            DockPanel.SetDock(headRow, Dock.Top);
+            dock.Children.Add(headRow);
+            dock.Children.Add(new ScrollViewer { Content = grid, HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled });
             return new Avalonia.Controls.Border
             {
                 Background = ShellTheme_U27.Panel,
                 BorderBrush = ShellTheme_U27.Border,
                 BorderThickness = new Thickness(0, 0, 1, 0),
-                Width = 156,
-                Child = new ScrollViewer { Content = stack, HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled },
+                Width = 150,
+                Child = dock,
             };
         }
 
@@ -388,19 +390,19 @@ namespace RageLightEditor.Shell
 
         private Control BuildOutput()
         {
-            outTabAll = new ShellButton_U27(null, "Output", null, underline: true) { Padding = new Thickness(12, 0), Height = 30 };
-            outTabErrors = new ShellButton_U27(null, "Problems", null, underline: true) { Padding = new Thickness(12, 0), Height = 30 };
+            outTabAll = new ShellButton_U27(ShellIcons_U27.Output, "Output", null, 13, underline: true) { Padding = new Thickness(10, 0), Height = 26 };
+            outTabErrors = new ShellButton_U27(ShellIcons_U27.Info, "Problems", null, 13, underline: true) { Padding = new Thickness(10, 0), Height = 26 };
             outTabAll.Click += () => { outputErrorsOnly = false; logVersion = -1; Sync(); };
             outTabErrors.Click += () => { outputErrorsOnly = true; logVersion = -1; Sync(); AppLog_U21.MarkSeen(); };
             outputCount = new TextBlock { Foreground = ShellTheme_U27.Dim, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0) };
-            var clear = new ShellButton_U27(null, "Clear", "Clear the log") { Height = 26 };
+            var clear = new ShellButton_U27(null, "Clear", "Clear the log") { Height = 22 };
             clear.Click += () => { AppLog_U21.Clear(); logVersion = -1; Sync(); };
-            var folder = new ShellButton_U27(ShellIcons_U27.Open, null, "Open the log folder", 15) { Height = 26 };
+            var folder = new ShellButton_U27(ShellIcons_U27.Open, null, "Open the log folder", 13) { Height = 22, IconColour = ShellTheme_U27.IconAmber };
             folder.Click += () => Act(() => P.ShellCommand_U27("logfolder"));
-            var hide = new ShellButton_U27(ShellIcons_U27.Minus, null, "Hide the output panel", 15) { Height = 26 };
+            var hide = new ShellButton_U27(ShellIcons_U27.Close, null, "Hide the output panel", 12) { Height = 22 };
             hide.Click += () => SetOutput(false);
 
-            var head = new DockPanel { LastChildFill = false, Height = 30 };
+            var head = new DockPanel { LastChildFill = false, Height = 26 };
             var left = new StackPanel { Orientation = Orientation.Horizontal };
             left.Children.Add(outTabAll);
             left.Children.Add(outTabErrors);
@@ -418,13 +420,13 @@ namespace RageLightEditor.Shell
             {
                 FontFamily = new FontFamily("Cascadia Mono, Consolas, $Default"),
                 FontSize = 12,
-                Margin = new Thickness(12, 6),
+                Margin = new Thickness(10, 5),
                 TextWrapping = TextWrapping.NoWrap,
             };
             outputScroll = new ScrollViewer { Content = outputText, HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto };
 
             var dp = new DockPanel();
-            var headBorder = new Avalonia.Controls.Border { Child = head, BorderBrush = ShellTheme_U27.Border, BorderThickness = new Thickness(0, 0, 0, 1) };
+            var headBorder = new Avalonia.Controls.Border { Child = head, Background = ShellTheme_U27.Bar, BorderBrush = ShellTheme_U27.Border, BorderThickness = new Thickness(0, 0, 0, 1) };
             DockPanel.SetDock(headBorder, Dock.Top);
             dp.Children.Add(headBorder);
             dp.Children.Add(outputScroll);
@@ -440,9 +442,9 @@ namespace RageLightEditor.Shell
 
         private Control BuildStatus()
         {
-            statusLeft = new TextBlock { Foreground = ShellTheme_U27.Dim, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(12, 0), FontSize = 12 };
-            statusRight = new TextBlock { Foreground = ShellTheme_U27.Dim, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(12, 0), FontSize = 12 };
-            bOutput = new ShellButton_U27(ShellIcons_U27.Output, "Output", "Show or hide the output panel", 14) { Height = 24, Padding = new Thickness(8, 0) };
+            statusLeft = new TextBlock { Foreground = ShellTheme_U27.Dim, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10, 0), FontSize = 11.5 };
+            statusRight = new TextBlock { Foreground = ShellTheme_U27.Dim, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10, 0), FontSize = 11.5 };
+            bOutput = new ShellButton_U27(ShellIcons_U27.Output, "Output", "Show or hide the output panel", 13) { Height = 22, Padding = new Thickness(8, 0) };
             bOutput.Click += () => SetOutput(!outputWanted);
             var dp = new DockPanel { LastChildFill = false };
             DockPanel.SetDock(statusLeft, Dock.Left);
@@ -450,7 +452,7 @@ namespace RageLightEditor.Shell
             DockPanel.SetDock(statusRight, Dock.Right);
             dp.Children.Add(statusLeft);
             dp.Children.Add(bOutput);
-            bUpdate = new ShellButton_U27(null, "Update", "A newer version is out - click to open its download page") { Height = 24, Padding = new Thickness(8, 0), OnColour = ShellTheme_U27.Ok, IsOn = true, IsVisible = false };
+            bUpdate = new ShellButton_U27(null, "Update", "A newer version is out - click to open its download page") { Height = 22, Padding = new Thickness(8, 0), OnColour = ShellTheme_U27.Ok, IsOn = true, IsVisible = false };
             bUpdate.Click += () => UpdateCheck_U30.OpenDownloadPage();
             DockPanel.SetDock(bUpdate, Dock.Right);
             dp.Children.Add(bUpdate);
@@ -460,7 +462,7 @@ namespace RageLightEditor.Shell
                 Background = ShellTheme_U27.Window,
                 BorderBrush = ShellTheme_U27.Border,
                 BorderThickness = new Thickness(0, 1, 0, 0),
-                Height = 26,
+                Height = 24,
                 Child = dp,
             };
         }
@@ -519,6 +521,7 @@ namespace RageLightEditor.Shell
             Item("Add prop...", () => P.ShellCommand_U27("addprop")),
             Item("New light prop...", () => P.ShellCommand_U27("newlightprop")),
             Item("Load YTD...", () => P.ShellCommand_U27("loadytd")),
+            Item("Import MLO (.ytyp)...", () => P.ShellCommand_U27("importmlo")),
             new Separator(),
             Item("Save", () => P.ShellCommand_U27("save"), () => P.ShellCanSave_U27, null, "Ctrl+S",
                 () => P.ShellMultiSave_U27 ? "Save all" : "Save"),
@@ -643,6 +646,8 @@ namespace RageLightEditor.Shell
 
             string doc = p.ShellDocName_U27;
             if (docName.Text != doc) docName.Text = doc;
+            string vt = $"Viewport  ({form.ClientSize.Width}x{form.ClientSize.Height})  -  {TabLabel(p.Workspace)}";
+            if (viewTitle.Text != vt) viewTitle.Text = vt;
             var segs = new List<(string text, bool warn)> { (TabLabel(p.Workspace), false) };
             if (world) segs.Add(("Picks: " + p.SelectionModeName, false));
             if (p.WorldMode) segs.AddRange(p.ShellWorldStatus_U27());

@@ -144,15 +144,11 @@ while ($true) {
 $mb = [math]::Round((Get-Item $zip).Length / 1MB, 1)
 Write-Host "`nDone: $zip ($mb MB)" -ForegroundColor Green
 
-Step "6/6 refresh Download\ (the copy the repo hands out)"
-# Download\ is TRACKED, unlike _release\. Anyone who lands on the repo can grab a runnable
-# build from here without installing a toolchain, and it is refreshed by the same command that
-# produces the zip - so it can never quietly fall behind the source next to it.
-#
-# These two files are ~140 MB together and git keeps every version of them forever, so the
-# repo grows by that much per release and none of it can be reclaimed without rewriting
-# history. Drop the exe line below if that ever matters more than the convenience: the zip
-# contains the same exe plus the data files.
+Step "6/6 refresh Download\ (the latest build on this PC)"
+# Download\ holds the latest runnable build, refreshed by the same command that produces the
+# zip. Its exe and zip are NOT tracked by git (.gitignore): together they added ~170 MB to the
+# history per release. Only BUILD.txt and the .asi are tracked; the program itself is handed
+# out through GitHub releases.
 $dl = Join-Path $root "Download"
 New-Item -ItemType Directory -Force $dl | Out-Null
 # WS-V39: the same scrub HERE. Download\ is tracked, and a run of the packaged exe from that

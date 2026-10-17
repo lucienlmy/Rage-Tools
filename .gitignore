@@ -9,11 +9,12 @@ _release/
 __pycache__/
 *.pyc
 
-# Release packaging: build scratch stays out, but Download/ is the published build
-# and IS tracked, so the repo itself hands out a runnable copy.
+# Release packaging: build scratch stays out. Download/ holds the latest build on this PC,
+# but its exe and zip are NOT tracked: they added ~170 MB to the history per release.
+# The built program is handed out through GitHub releases.
 Versions/
 *.zip
-!Download/*.zip
+Download/*.exe
 RAGE_Light_Editor_V2/
 
 # NEVER publish: the obfuscation map de-obfuscates a shipped build
@@ -59,7 +60,6 @@ texindex_*.bin
 # of someone else's package has no business in this repo's history.
 com.unity.cinemachine-main/
 *.zip
-!Download/*.zip
 
 # The build script trims Download/ to the exe, the zip and BUILD.txt; anything else in
 # there is what a test run of the published copy left behind.

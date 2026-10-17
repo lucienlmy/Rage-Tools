@@ -33,6 +33,11 @@ namespace RageLightEditor.Shell
             (ShellIcons_U27.Sliders, "Options", "How the world is drawn"),
         };
 
+        private static readonly IBrush[] RightPageColours =
+        {
+            ShellTheme_U27.IconCyan, ShellTheme_U27.IconAmber, ShellTheme_U27.IconPurple, ShellTheme_U27.IconGreen, ShellTheme_U27.IconGrey,
+        };
+
         private ColumnDefinition rightColumn;
         private Control rightHeader, rightBody, rightSplitter;
         private readonly List<ShellButton_U27> pageTabs = new List<ShellButton_U27>();
@@ -63,26 +68,27 @@ namespace RageLightEditor.Shell
         private ShellButton_U27 bSaveModels;
         private string modelsSig;
 
-        private static readonly IBrush FieldBg = new SolidColorBrush(Color.Parse("#0A0B0D"));
+        private static readonly IBrush FieldBg = new SolidColorBrush(Color.Parse("#111112"));
 
         private void BuildRight_U27()
         {
-            var tabsGrid = new UniformGrid { Columns = RightPages.Length, Rows = 1 };
+            var tabsGrid = new Grid { ColumnDefinitions = new ColumnDefinitions("80*,68*,66*,54*,72*") };
             for (int i = 0; i < RightPages.Length; i++)
             {
                 var (icon, label, tip) = RightPages[i];
-                var b = new ShellButton_U27(icon, label, tip, 22, vertical: true) { CornerRadius = new CornerRadius(0), Margin = new Thickness(0) };
+                var b = new ShellButton_U27(icon, label, tip, 13) { PanelTab = true, IconColour = RightPageColours[i], Margin = new Thickness(0), Padding = new Thickness(2, 0), ClipToBounds = true, LabelSize = 11.5 };
                 int idx = i;
                 b.Click += () => SelectPage(idx);
                 pageTabs.Add(b);
+                Grid.SetColumn(b, i);
                 tabsGrid.Children.Add(b);
             }
             rightHeader = new Avalonia.Controls.Border
             {
-                Background = ShellTheme_U27.PanelDeep,
+                Background = ShellTheme_U27.Bar,
                 BorderBrush = ShellTheme_U27.Border,
                 BorderThickness = new Thickness(1, 0, 0, 1),
-                Height = 58,
+                Height = 40,
                 Child = tabsGrid,
             };
 
@@ -108,13 +114,13 @@ namespace RageLightEditor.Shell
             subLights = SubTab("Lights");
             subMap.Click += () => ShowSub(false);
             subLights.Click += () => ShowSub(true);
-            var subGrid = new UniformGrid { Columns = 2, Rows = 1, Height = 32 };
+            var subGrid = new UniformGrid { Columns = 2, Rows = 1, Height = 28 };
             subGrid.Children.Add(subMap);
             subGrid.Children.Add(subLights);
 
             filterBox = Field();
             filterBox.PlaceholderText = "Filter by archetype";
-            filterBox.Margin = new Thickness(8, 6, 8, 4);
+            filterBox.Margin = new Thickness(6, 5, 6, 3);
             filterBox.TextChanged += (s, e) => { foreach (var it in ymapItems.Values) if (it.IsExpanded) FillYmap(it); };
 
             tree = new TreeView { Margin = new Thickness(2, 0, 2, 2), FontSize = 12 };
@@ -152,12 +158,12 @@ namespace RageLightEditor.Shell
             detailTab = SubTab("Details");
             propTab.Click += () => ShowDetails(false);
             detailTab.Click += () => ShowDetails(true);
-            var propTabs = new UniformGrid { Columns = 2, Rows = 1, Height = 32 };
+            var propTabs = new UniformGrid { Columns = 2, Rows = 1, Height = 28 };
             propTabs.Children.Add(propTab);
             propTabs.Children.Add(detailTab);
 
             propsPane = BuildProps();
-            detailRows = new StackPanel { Margin = new Thickness(10, 6) };
+            detailRows = new StackPanel();
             detailsPane = new ScrollViewer { Content = detailRows, IsVisible = false };
             noSelNote = new TextBlock
             {
@@ -209,9 +215,9 @@ namespace RageLightEditor.Shell
         private static TextBox Field() => new TextBox
         {
             FontSize = 12,
-            MinHeight = 24,
-            Height = 26,
-            Padding = new Thickness(6, 3),
+            MinHeight = 22,
+            Height = 24,
+            Padding = new Thickness(6, 2),
             Background = FieldBg,
             BorderBrush = ShellTheme_U27.Border,
             VerticalContentAlignment = VerticalAlignment.Center,
@@ -250,8 +256,8 @@ namespace RageLightEditor.Shell
             var tintB = new List<Avalonia.Controls.Shapes.Shape>();
             selIcon = ShellTheme_U27.Icon(ShellIcons_U27.Local, 20, tintA);
             selIconMlo = ShellTheme_U27.Icon(ShellIcons_U27.House, 20, tintB);
-            foreach (var s in tintA) s.Stroke = ShellTheme_U27.Accent;
-            foreach (var s in tintB) s.Stroke = ShellTheme_U27.Accent;
+            foreach (var s in tintA) { if ((s.Tag as string) == "f") s.Fill = ShellTheme_U27.SoftFill(EntityBrush); else s.Stroke = EntityBrush; }
+            foreach (var s in tintB) { if ((s.Tag as string) == "f") s.Fill = ShellTheme_U27.SoftFill(MloBrush); else s.Stroke = MloBrush; }
             selName = new TextBlock { FontWeight = FontWeight.SemiBold, Foreground = Brushes.White, TextTrimming = TextTrimming.CharacterEllipsis };
             selWhere = new TextBlock { FontSize = 11, Foreground = ShellTheme_U27.Dim, TextTrimming = TextTrimming.CharacterEllipsis };
             var names = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 4, 0) };
@@ -267,7 +273,7 @@ namespace RageLightEditor.Shell
             var icons = new Grid { VerticalAlignment = VerticalAlignment.Center };
             icons.Children.Add(selIcon);
             icons.Children.Add(selIconMlo);
-            var dp = new DockPanel { Margin = new Thickness(10, 6) };
+            var dp = new DockPanel { Margin = new Thickness(8, 4) };
             DockPanel.SetDock(icons, Dock.Left);
             DockPanel.SetDock(btns, Dock.Right);
             dp.Children.Add(icons);
@@ -286,17 +292,20 @@ namespace RageLightEditor.Shell
 
         private Control BuildProps()
         {
-            var stack = new StackPanel { Margin = new Thickness(0, 4) };
+            var stack = new StackPanel();
+            var colHead = new Grid { ColumnDefinitions = new ColumnDefinitions("104,*"), Height = 22, Background = ShellTheme_U27.PanelDeep };
+            var colName = new TextBlock { Text = "Name", FontSize = 11, Foreground = ShellTheme_U27.Dim, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10, 0, 0, 0) };
+            var colValue = new TextBlock { Text = "Value", FontSize = 11, Foreground = ShellTheme_U27.Dim, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10, 0, 0, 0) };
+            Grid.SetColumn(colValue, 1);
+            colHead.Children.Add(colName);
+            colHead.Children.Add(colValue);
+            stack.Children.Add(Underlined(colHead));
+            StackPanel rows = null;
             void Group(string name)
             {
-                stack.Children.Add(new TextBlock
-                {
-                    Text = name,
-                    FontSize = 11,
-                    FontWeight = FontWeight.SemiBold,
-                    Foreground = ShellTheme_U27.Faint,
-                    Margin = new Thickness(10, 8, 0, 2),
-                });
+                rows = new StackPanel { Margin = new Thickness(0, 3, 0, 4) };
+                stack.Children.Add(GroupBar(name, rows));
+                stack.Children.Add(rows);
             }
             void Prop(string label, string tip, float step, Func<YmapEntityDef, float> get, Action<LightPanel.EntityEdit, float> set)
             {
@@ -304,7 +313,7 @@ namespace RageLightEditor.Shell
                 var lab = new TextBlock
                 {
                     Text = label,
-                    Foreground = ShellTheme_U27.Dim,
+                    Foreground = ShellTheme_U27.Text,
                     VerticalAlignment = VerticalAlignment.Center,
                     Cursor = new Cursor(StandardCursorType.SizeWestEast),
                     Background = Brushes.Transparent,
@@ -338,34 +347,34 @@ namespace RageLightEditor.Shell
                     else if (e.Key == Key.Escape) { form.FocusViewport_U27(); e.Handled = true; }
                 };
                 box.LostFocus += (s, e) => Commit();
-                var row = new Grid { ColumnDefinitions = new ColumnDefinitions("104,*"), Margin = new Thickness(10, 2, 10, 2) };
+                var row = new Grid { ColumnDefinitions = new ColumnDefinitions("94,*"), Margin = new Thickness(10, 1, 8, 1) };
                 Grid.SetColumn(box, 1);
                 row.Children.Add(lab);
                 row.Children.Add(box);
-                stack.Children.Add(row);
+                rows.Children.Add(row);
                 fields.Add((box, get, set));
             }
-            Group("POSITION");
+            Group("Position");
             Prop("X", "Position X, world metres", 0.05f, e => e.Position.X, (d, v) => d.Position.X = v);
             Prop("Y", "Position Y, world metres", 0.05f, e => e.Position.Y, (d, v) => d.Position.Y = v);
             Prop("Z", "Position Z, world metres", 0.05f, e => e.Position.Z, (d, v) => d.Position.Z = v);
-            Group("ROTATION");
+            Group("Rotation");
             Prop("Roll", "Rotation X, degrees", 0.5f, e => Euler(e).X, (d, v) => d.RotationDeg.X = v);
             Prop("Pitch", "Rotation Y, degrees", 0.5f, e => Euler(e).Y, (d, v) => d.RotationDeg.Y = v);
             Prop("Yaw", "Rotation Z, degrees", 0.5f, e => Euler(e).Z, (d, v) => d.RotationDeg.Z = v);
-            Group("SCALE");
+            Group("Scale");
             Prop("X", "Scale X", 0.01f, e => e.Scale.X, (d, v) => d.Scale.X = v);
             Prop("Y", "Scale Y", 0.01f, e => e.Scale.Y, (d, v) => d.Scale.Y = v);
             Prop("Z", "Scale Z", 0.01f, e => e.Scale.Z, (d, v) => d.Scale.Z = v);
-            Group("DRAWING");
+            Group("Drawing");
             Prop("Draw dist", "How far away this placement is still drawn, in metres.\nZero means the archetype's own distance.", 1.0f,
                 e => e.LodDist, (d, v) => d.LodDist = Math.Clamp(v, 0f, 20000f));
 
-            Group("EDIT");
-            var acts = new UniformGrid { Columns = 4, Rows = 1, Margin = new Thickness(8, 2, 8, 2) };
+            Group("Edit");
+            var acts = new UniformGrid { Columns = 4, Rows = 1, Margin = new Thickness(8, 2, 6, 2) };
             ShellButton_U27 A(string text, string tip, Action a, bool danger = false)
             {
-                var b = new ShellButton_U27(null, text, tip) { Margin = new Thickness(2), Height = 28, BaseBackground = ShellTheme_U27.Hover, Padding = new Thickness(4, 0) };
+                var b = new ShellButton_U27(null, text, tip) { Margin = new Thickness(1), Height = 26, BaseBackground = ShellTheme_U27.Hover, Padding = new Thickness(4, 0) };
                 if (danger) b.OnColour = ShellTheme_U27.Error;
                 b.Click += () => Act(a);
                 acts.Children.Add(b);
@@ -375,12 +384,45 @@ namespace RageLightEditor.Shell
             A("Duplicate", "A copy beside it, selected  (Ctrl+D)", () => P.RequestWorldDuplicate = true);
             A("Paste", "Into the selected entity's ymap  (Ctrl+V)", () => P.RequestWorldPaste = true);
             A("Delete", "No confirmation - deleting is one Undo away  (Delete)", () => P.RequestWorldDelete = true, true);
-            stack.Children.Add(acts);
-            var addProj = new ShellButton_U27(ShellIcons_U27.Project, "Add to project", "The ymap this entity lives in joins the project.", 16)
-            { Margin = new Thickness(10, 2, 10, 8), Height = 30, BaseBackground = ShellTheme_U27.Hover };
+            rows.Children.Add(acts);
+            var addProj = new ShellButton_U27(ShellIcons_U27.Project, "Add to project", "The ymap this entity lives in joins the project.", 14)
+            { Margin = new Thickness(9, 2, 7, 6), Height = 26, BaseBackground = ShellTheme_U27.Hover, IconColour = ShellTheme_U27.IconAmber };
             addProj.Click += () => Act(() => P.RequestAddSelectionToProject = true);
-            stack.Children.Add(addProj);
+            rows.Children.Add(addProj);
             return new ScrollViewer { Content = stack };
+        }
+
+        private static Control GroupBar(string name, Control body)
+        {
+            var mark = new Avalonia.Controls.Border
+            {
+                Width = 8, Height = 8, CornerRadius = new CornerRadius(1),
+                Background = ShellTheme_U27.IconGrey,
+                BorderBrush = ShellTheme_U27.IconGrey,
+                BorderThickness = new Thickness(1),
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(10, 0, 8, 0),
+            };
+            var text = new TextBlock { Text = name, FontSize = 12, FontWeight = FontWeight.SemiBold, Foreground = ShellTheme_U27.Text, VerticalAlignment = VerticalAlignment.Center };
+            var st = new StackPanel { Orientation = Orientation.Horizontal };
+            st.Children.Add(mark);
+            st.Children.Add(text);
+            var bar = new Avalonia.Controls.Border
+            {
+                Background = ShellTheme_U27.Bar,
+                Height = 24,
+                Child = st,
+                Cursor = new Cursor(StandardCursorType.Hand),
+            };
+            ToolTip.SetTip(bar, "Click to fold or unfold");
+            bar.PointerPressed += (s, e) =>
+            {
+                if (!e.GetCurrentPoint(bar).Properties.IsLeftButtonPressed) return;
+                body.IsVisible = !body.IsVisible;
+                mark.Background = body.IsVisible ? ShellTheme_U27.IconGrey : Brushes.Transparent;
+                e.Handled = true;
+            };
+            return bar;
         }
 
         private Control BuildFooter()
@@ -388,11 +430,11 @@ namespace RageLightEditor.Shell
             dirtyText = new TextBlock { Foreground = ShellTheme_U27.Warn, FontSize = 12 };
             folderText = new TextBlock { Foreground = ShellTheme_U27.Dim, FontSize = 12, TextTrimming = TextTrimming.CharacterEllipsis };
             editStatus = new TextBlock { Foreground = ShellTheme_U27.Dim, FontSize = 11, TextWrapping = TextWrapping.Wrap };
-            var folder = new ShellButton_U27(ShellIcons_U27.Open, null, "Where edited .ymap files are written", 15) { Height = 26 };
+            var folder = new ShellButton_U27(ShellIcons_U27.Open, null, "Where edited .ymap files are written", 14) { Height = 24, IconColour = ShellTheme_U27.IconAmber };
             folder.Click += () => Act(() => P.RequestWorldChooseOutput = true);
-            bSaveYmaps = new ShellButton_U27(ShellIcons_U27.Save, "Save ymaps", null, 15) { Height = 28, BaseBackground = ShellTheme_U27.AccentSoft };
+            bSaveYmaps = new ShellButton_U27(ShellIcons_U27.Save, "Save ymaps", null, 14) { Height = 26, BaseBackground = ShellTheme_U27.AccentSoft };
             bSaveYmaps.Click += () => Act(() => P.RequestWorldSaveAll = true);
-            bDiscard = new ShellButton_U27(null, "Discard", "Throw the changes away. The world reloads them from the archives.") { Height = 28 };
+            bDiscard = new ShellButton_U27(null, "Discard", "Throw the changes away. The world reloads them from the archives.") { Height = 26 };
             bDiscard.Click += () => Act(() => P.RequestWorldDiscard = true);
             var folderRow = new DockPanel();
             DockPanel.SetDock(folder, Dock.Right);
@@ -405,7 +447,7 @@ namespace RageLightEditor.Shell
             ToolTip.SetTip(modelsHead, "Every .ydr / .yft whose lights you changed in the world. Save them one by one, or all at once.");
             modelsList = new StackPanel { Spacing = 2 };
             bSaveModels = new ShellButton_U27(ShellIcons_U27.Save, "Save all models", "Writes every unsaved model. A model saved before goes back to its own file; the others go to the output folder.", 15)
-            { Height = 28, BaseBackground = ShellTheme_U27.AccentSoft, HorizontalAlignment = HorizontalAlignment.Left };
+            { Height = 26, BaseBackground = ShellTheme_U27.AccentSoft, HorizontalAlignment = HorizontalAlignment.Left };
             bSaveModels.Click += () => Act(() => P.RequestSaveEditedModels_U32 = true);
             modelsStatus = new TextBlock { Foreground = ShellTheme_U27.Dim, FontSize = 11, TextWrapping = TextWrapping.Wrap };
             modelsBlock = new StackPanel { Spacing = 4, IsVisible = false, Margin = new Thickness(0, 0, 0, 6) };
@@ -563,13 +605,7 @@ namespace RageLightEditor.Shell
             return st;
         }
 
-        private static Control TintedIcon(string data, IBrush b)
-        {
-            var tint = new List<Avalonia.Controls.Shapes.Shape>();
-            var ic = ShellTheme_U27.Icon(data, 15, tint);
-            foreach (var s in tint) s.Stroke = b;
-            return ic;
-        }
+        private static Control TintedIcon(string data, IBrush b) => ShellTheme_U27.Tinted(data, 14, b);
 
         private static readonly IBrush YmapBrush = new SolidColorBrush(Color.Parse("#6FA8FF"));
         private static readonly IBrush EntityBrush = new SolidColorBrush(Color.Parse("#E8B04B"));
@@ -755,7 +791,7 @@ namespace RageLightEditor.Shell
             var d = e._CEntityDef;
             var rows = new List<(string, string)>
             {
-                ("ENTITY", null),
+                ("Entity", null),
                 ("Archetype", d.archetypeName.ToString() + "   # " + d.archetypeName.Hash),
                 ("GUID", d.guid.ToString()),
                 ("Flags", d.flags.ToString()),
@@ -773,7 +809,7 @@ namespace RageLightEditor.Shell
             if (a != null)
             {
                 var b = a._BaseArchetypeDef;
-                rows.Add(("ARCHETYPE", null));
+                rows.Add(("Archetype", null));
                 rows.Add(("Name", a.Name + "   # " + a.Hash));
                 rows.Add(("Type", a is MloArchetype ? "MLO (interior)" : a is TimeArchetype ? "Time" : "Base"));
                 rows.Add(("Asset", b.assetName.ToString() + "   " + b.assetType.ToString().Replace("ASSET_TYPE_", "")));
@@ -794,9 +830,9 @@ namespace RageLightEditor.Shell
                 if (k < detailRows.Children.Count) g = (Grid)detailRows.Children[k];
                 else
                 {
-                    g = new Grid { ColumnDefinitions = new ColumnDefinitions("104,*"), Margin = new Thickness(0, 2) };
-                    var l = new TextBlock { Foreground = ShellTheme_U27.Dim, FontSize = 12 };
-                    var v = new SelectableTextBlock { Foreground = ShellTheme_U27.Text, FontSize = 12, TextWrapping = TextWrapping.Wrap };
+                    g = new Grid { ColumnDefinitions = new ColumnDefinitions("104,*") };
+                    var l = new TextBlock { Foreground = ShellTheme_U27.Dim, FontSize = 12, VerticalAlignment = VerticalAlignment.Center };
+                    var v = new SelectableTextBlock { Foreground = ShellTheme_U27.Text, FontSize = 12, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 3, 8, 3) };
                     Grid.SetColumn(v, 1);
                     g.Children.Add(l);
                     g.Children.Add(v);
@@ -808,9 +844,10 @@ namespace RageLightEditor.Shell
                 bool head = value == null;
                 lt.Text = label;
                 lt.FontWeight = head ? FontWeight.SemiBold : FontWeight.Normal;
-                lt.Foreground = head ? ShellTheme_U27.Faint : ShellTheme_U27.Dim;
+                lt.Foreground = head ? ShellTheme_U27.Text : ShellTheme_U27.Dim;
                 Grid.SetColumnSpan(lt, head ? 2 : 1);
-                lt.Margin = head ? new Thickness(0, 8, 0, 0) : new Thickness(0);
+                lt.Margin = head ? new Thickness(10, 5, 0, 5) : new Thickness(10, 3, 0, 3);
+                g.Background = head ? ShellTheme_U27.Bar : null;
                 if (vt.Text != (value ?? "")) vt.Text = value ?? "";
             }
             while (detailRows.Children.Count > k) detailRows.Children.RemoveAt(detailRows.Children.Count - 1);

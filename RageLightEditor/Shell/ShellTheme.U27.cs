@@ -22,27 +22,95 @@ namespace RageLightEditor.Shell
 {
     public static class ShellTheme_U27
     {
-        public static readonly Color AccentColour = Color.Parse("#3B82F6");
-        public static readonly IBrush Window = new SolidColorBrush(Color.Parse("#0E0F11"));
-        public static readonly IBrush Panel = new SolidColorBrush(Color.Parse("#141518"));
-        public static readonly IBrush PanelDeep = new SolidColorBrush(Color.Parse("#101113"));
-        public static readonly IBrush Border = new SolidColorBrush(Color.Parse("#23252A"));
-        public static readonly IBrush Text = new SolidColorBrush(Color.Parse("#D4D6DB"));
-        public static readonly IBrush Dim = new SolidColorBrush(Color.Parse("#8B9099"));
-        public static readonly IBrush Faint = new SolidColorBrush(Color.Parse("#555A63"));
+        public static readonly Color AccentColour = Color.Parse("#2587F5");
+        public static readonly IBrush Window = new SolidColorBrush(Color.Parse("#101011"));
+        public static readonly IBrush Panel = new SolidColorBrush(Color.Parse("#1B1B1C"));
+        public static readonly IBrush PanelDeep = new SolidColorBrush(Color.Parse("#141415"));
+        public static readonly IBrush Bar = new SolidColorBrush(Color.Parse("#0A0A0B"));
+        public static readonly IBrush Border = new SolidColorBrush(Color.Parse("#2A2A2C"));
+        public static readonly IBrush Text = new SolidColorBrush(Color.Parse("#DCDEE2"));
+        public static readonly IBrush Dim = new SolidColorBrush(Color.Parse("#9A9DA3"));
+        public static readonly IBrush Faint = new SolidColorBrush(Color.Parse("#5F6268"));
         public static readonly IBrush Accent = new SolidColorBrush(AccentColour);
-        public static readonly IBrush AccentSoft = new SolidColorBrush(Color.Parse("#17294A"));
-        public static readonly IBrush Hover = new SolidColorBrush(Color.Parse("#1F2227"));
-        public static readonly IBrush Press = new SolidColorBrush(Color.Parse("#292D34"));
+        public static readonly IBrush AccentSoft = new SolidColorBrush(Color.Parse("#14365F"));
+        public static readonly IBrush Hover = new SolidColorBrush(Color.Parse("#2A2B2E"));
+        public static readonly IBrush Press = new SolidColorBrush(Color.Parse("#36383C"));
         public static readonly IBrush Warn = new SolidColorBrush(Color.Parse("#E5B454"));
         public static readonly IBrush Error = new SolidColorBrush(Color.Parse("#F06A5E"));
         public static readonly IBrush Ok = new SolidColorBrush(Color.Parse("#5FC98A"));
         public static readonly FontFamily Font = new FontFamily("fonts:Inter#Inter, $Default");
 
-        public static readonly IBrush Blue = new SolidColorBrush(Color.Parse("#3D8EF0"));
-        public static readonly IBrush BlueBright = new SolidColorBrush(Color.Parse("#7AB6FF"));
-        public static readonly IBrush BlueFill = new SolidColorBrush(Color.Parse("#593D8EF0"));
-        public static readonly IBrush BlueFillBright = new SolidColorBrush(Color.Parse("#737AB6FF"));
+        public static readonly IBrush Blue = new SolidColorBrush(Color.Parse("#4C9DFF"));
+        public static readonly IBrush BlueBright = new SolidColorBrush(Color.Parse("#8CC2FF"));
+        public static readonly IBrush BlueFill = new SolidColorBrush(Color.Parse("#594C9DFF"));
+        public static readonly IBrush BlueFillBright = new SolidColorBrush(Color.Parse("#738CC2FF"));
+
+        public static readonly IBrush IconGrey = new SolidColorBrush(Color.Parse("#C6C9CE"));
+        public static readonly IBrush IconRed = new SolidColorBrush(Color.Parse("#F0605A"));
+        public static readonly IBrush IconGreen = new SolidColorBrush(Color.Parse("#5FCB8B"));
+        public static readonly IBrush IconYellow = new SolidColorBrush(Color.Parse("#F4CB4C"));
+        public static readonly IBrush IconAmber = new SolidColorBrush(Color.Parse("#E8A94A"));
+        public static readonly IBrush IconCyan = new SolidColorBrush(Color.Parse("#4FC3F7"));
+        public static readonly IBrush IconPurple = new SolidColorBrush(Color.Parse("#B58CFF"));
+        public static readonly IBrush IconPink = new SolidColorBrush(Color.Parse("#F27FB2"));
+
+        private static readonly Dictionary<IBrush, IBrush> softFills = new Dictionary<IBrush, IBrush>();
+
+        public static IBrush SoftFill(IBrush b)
+        {
+            if (b == null) return Brushes.Transparent;
+            if (softFills.TryGetValue(b, out var f)) return f;
+            f = b is ISolidColorBrush sc ? new SolidColorBrush(sc.Color, 0.26) : Brushes.Transparent;
+            softFills[b] = f;
+            return f;
+        }
+
+        public static Control Tinted(string data, double size, IBrush colour)
+        {
+            var tint = new List<Shape>();
+            var ic = Icon(data, size, tint);
+            foreach (var s in tint)
+            {
+                if ((s.Tag as string) == "f") s.Fill = SoftFill(colour);
+                else s.Stroke = colour;
+            }
+            return ic;
+        }
+
+        public static Avalonia.Controls.Border PanelTitle(string icon, IBrush iconColour, TextBlock title, params Control[] right)
+        {
+            title.FontSize = 12;
+            title.FontWeight = FontWeight.SemiBold;
+            title.Foreground = Text;
+            title.VerticalAlignment = VerticalAlignment.Center;
+            title.TextTrimming = TextTrimming.CharacterEllipsis;
+            var dp = new DockPanel { LastChildFill = true };
+            if (icon != null)
+            {
+                var ic = Tinted(icon, 14, iconColour ?? IconGrey);
+                ic.Margin = new Thickness(8, 0, 6, 0);
+                ic.VerticalAlignment = VerticalAlignment.Center;
+                DockPanel.SetDock(ic, Dock.Left);
+                dp.Children.Add(ic);
+            }
+            else title.Margin = new Thickness(10, 0, 0, 0);
+            if (right != null && right.Length > 0)
+            {
+                var rs = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 1, Margin = new Thickness(0, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
+                foreach (var r in right) rs.Children.Add(r);
+                DockPanel.SetDock(rs, Dock.Right);
+                dp.Children.Add(rs);
+            }
+            dp.Children.Add(title);
+            return new Avalonia.Controls.Border
+            {
+                Background = Bar,
+                BorderBrush = Border,
+                BorderThickness = new Thickness(0, 0, 0, 1),
+                Height = 26,
+                Child = dp,
+            };
+        }
 
         public static Control Icon(string data, double size, List<Shape> tint, bool filled = false)
         {
@@ -59,7 +127,7 @@ namespace RageLightEditor.Shell
                 }
                 if (closed.Length > 0)
                 {
-                    var fill = new Path { Data = Geometry.Parse(closed.ToString()), Fill = BlueFill, Tag = "f" };
+                    var fill = new Path { Data = Geometry.Parse(closed.ToString()), Fill = SoftFill(IconGrey), Tag = "f" };
                     tint?.Add(fill);
                     canvas.Children.Add(fill);
                 }
@@ -70,8 +138,8 @@ namespace RageLightEditor.Shell
                 StrokeThickness = filled ? 0 : 1.8,
                 StrokeLineCap = PenLineCap.Round,
                 StrokeJoin = PenLineJoin.Round,
-                Stroke = filled ? null : Blue,
-                Fill = filled ? Blue : null,
+                Stroke = filled ? null : IconGrey,
+                Fill = filled ? IconGrey : null,
                 Tag = filled ? "g" : "s",
             };
             tint?.Add(path);
@@ -84,7 +152,7 @@ namespace RageLightEditor.Shell
             Background = Border,
             Width = vertical ? 1 : double.NaN,
             Height = vertical ? double.NaN : 1,
-            Margin = vertical ? new Thickness(6, 6) : new Thickness(0),
+            Margin = vertical ? new Thickness(5, 7) : new Thickness(0),
         };
     }
 
@@ -116,6 +184,18 @@ namespace RageLightEditor.Shell
         public const string Close = "M7,7 L17,17 M17,7 L7,17";
         public const string PanelRight = "M4,5 H20 V19 H4 Z M14.5,5 V19";
         public const string Output = "M4,5 H20 V19 H4 Z M7,9 L10,12 L7,15 M12,15 H16";
+        public const string Monitor = "M3.5,5 H20.5 V16 H3.5 Z M9,20 H15 M12,16 V20";
+        public const string Tree = "M5,4 H11 V8 H5 Z M13,10 H19 V14 H13 Z M13,16.5 H19 V20.5 H13 Z M8,8 V18.5 H13 M8,12 H13";
+        public const string List = "M4,6.5 H6 M9,6.5 H20 M4,12 H6 M9,12 H20 M4,17.5 H6 M9,17.5 H20";
+
+        public static readonly IBrush[] ModeColours =
+        {
+            ShellTheme_U27.IconAmber, ShellTheme_U27.IconCyan, ShellTheme_U27.IconGreen, ShellTheme_U27.IconPurple,
+            ShellTheme_U27.IconYellow, ShellTheme_U27.IconRed, ShellTheme_U27.IconGreen, ShellTheme_U27.IconCyan,
+            ShellTheme_U27.Blue, ShellTheme_U27.Blue, ShellTheme_U27.IconPurple, ShellTheme_U27.IconGreen,
+            ShellTheme_U27.IconPink, ShellTheme_U27.IconAmber, ShellTheme_U27.IconYellow, ShellTheme_U27.IconPurple,
+            ShellTheme_U27.IconGreen, ShellTheme_U27.IconPink, ShellTheme_U27.IconRed, ShellTheme_U27.IconYellow,
+        };
 
         public static readonly string[] Modes =
         {
@@ -156,18 +236,20 @@ namespace RageLightEditor.Shell
         private readonly List<TextBlock> labels = new List<TextBlock>();
         private bool hover, press, on, enabled = true;
         private readonly bool underline;
+        private IBrush iconColour;
+        private bool panelTab;
 
         public ShellButton_U27(string icon, string text, string tip, double iconSize = 18, bool vertical = false,
             bool underline = false)
         {
             this.underline = underline;
             Cursor = new Cursor(StandardCursorType.Hand);
-            CornerRadius = new CornerRadius(underline ? 0 : 5);
-            Padding = vertical ? new Thickness(4, 7, 4, 5) : new Thickness(text == null ? 6 : 9, 5);
+            CornerRadius = new CornerRadius(underline ? 0 : 3);
+            Padding = vertical ? new Thickness(4, 6, 4, 4) : new Thickness(text == null ? 6 : 8, 4);
             var stack = new StackPanel
             {
                 Orientation = vertical ? Orientation.Vertical : Orientation.Horizontal,
-                Spacing = vertical ? 5 : 6,
+                Spacing = vertical ? 4 : 6,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
             };
@@ -183,7 +265,7 @@ namespace RageLightEditor.Shell
                 var tb = new TextBlock
                 {
                     Text = text,
-                    FontSize = vertical ? 11 : 13,
+                    FontSize = vertical ? 10.5 : 12,
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     TextTrimming = TextTrimming.CharacterEllipsis,
@@ -207,6 +289,9 @@ namespace RageLightEditor.Shell
         public bool IsOn { get => on; set { if (on == value) return; on = value; Refresh(); } }
         public bool Enabled { get => enabled; set { if (enabled == value) return; enabled = value; Refresh(); } }
         public IBrush OnColour { get; set; }
+        public IBrush IconColour { get => iconColour; set { iconColour = value; Refresh(); } }
+        public double LabelSize { set { foreach (var l in labels) l.FontSize = value; } }
+        public bool PanelTab { get => panelTab; set { panelTab = value; CornerRadius = new CornerRadius(0); Refresh(); } }
         private IBrush baseBackground = Brushes.Transparent;
         public IBrush BaseBackground { get => baseBackground; set { baseBackground = value; Refresh(); } }
 
@@ -231,11 +316,21 @@ namespace RageLightEditor.Shell
 
         private void Refresh()
         {
-            bool lit = hover || press || on;
+            bool solid = on && enabled && OnColour == null && !underline && !panelTab;
             IBrush text = !enabled ? ShellTheme_U27.Faint : on ? (OnColour ?? Brushes.White) : hover ? Brushes.White : ShellTheme_U27.Text;
-            IBrush icon = !enabled ? ShellTheme_U27.Faint : on && OnColour != null ? OnColour : lit ? ShellTheme_U27.BlueBright : ShellTheme_U27.Blue;
-            IBrush fill = !enabled ? Brushes.Transparent : lit ? ShellTheme_U27.BlueFillBright : ShellTheme_U27.BlueFill;
-            if (underline)
+            IBrush icon = !enabled ? ShellTheme_U27.Faint
+                : on && OnColour != null ? OnColour
+                : solid ? Brushes.White
+                : iconColour ?? (hover || press ? Brushes.White : ShellTheme_U27.IconGrey);
+            IBrush fill = !enabled ? Brushes.Transparent : ShellTheme_U27.SoftFill(icon);
+            if (panelTab)
+            {
+                Background = on ? ShellTheme_U27.Panel : enabled && (press || hover) ? ShellTheme_U27.Hover : Brushes.Transparent;
+                BorderBrush = on ? ShellTheme_U27.Accent : Brushes.Transparent;
+                BorderThickness = new Thickness(0, 2, 0, 0);
+                text = !enabled ? ShellTheme_U27.Faint : on || hover ? Brushes.White : ShellTheme_U27.Dim;
+            }
+            else if (underline)
             {
                 Background = enabled && (press || hover) ? ShellTheme_U27.Hover : Brushes.Transparent;
                 BorderBrush = on ? ShellTheme_U27.Accent : Brushes.Transparent;
@@ -246,6 +341,7 @@ namespace RageLightEditor.Shell
             {
                 Background = !enabled ? baseBackground
                     : press ? ShellTheme_U27.Press
+                    : solid ? ShellTheme_U27.Accent
                     : on ? ShellTheme_U27.AccentSoft
                     : hover ? ShellTheme_U27.Hover : baseBackground;
                 if (on && !enabled) Background = ShellTheme_U27.Hover;

@@ -300,7 +300,13 @@ namespace RageLightEditor.Editor
             if (ForceOpenHeader != null)
                 ImGui.SetNextItemOpen(label.Contains(ForceOpenHeader, StringComparison.OrdinalIgnoreCase),
                     ImGuiCond.Always);
-            return ImGui.CollapsingHeader(label, flags);
+            if (!ShellChrome_U27) return ImGui.CollapsingHeader(label, flags);
+            ImGui.PushStyleColor(ImGuiCol.Header, new Vector4(0.039f, 0.039f, 0.043f, 1f));
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(0.110f, 0.112f, 0.120f, 1f));
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, new Vector4(0.150f, 0.153f, 0.163f, 1f));
+            bool open = ImGui.CollapsingHeader(label, flags);
+            ImGui.PopStyleColor(3);
+            return open;
         }
 
         public void Draw(float displayWidth, float displayHeight)
@@ -1154,6 +1160,9 @@ namespace RageLightEditor.Editor
             if (ImGui.SmallButton("Open...")) RequestOpenFile?.Invoke();
             if (ImGui.SmallButton("Load YTD...")) RequestOpenYtd?.Invoke();
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Load a texture dictionary");
+            SameLineIfFits("Import MLO...");
+            if (ImGui.SmallButton("Import MLO...")) RequestImportYtyp?.Invoke();
+            if (ImGui.IsItemHovered()) ImGui.SetTooltip("Load an interior .ytyp: every entity is placed at its exact position.\nCustom props are read from the folder the .ytyp lives in;\nbase-game props come from your GTA V install.");
 
             bool canSave = scene.HasModel;
             string saveLabel = scene.Files.Count > 1 ? "Save all" : "Save";
@@ -3432,7 +3441,7 @@ namespace RageLightEditor.Editor
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Pick any mix of .ytyp and .ymap files at once. The archetypes are loaded first,\n"
                                  + "then the placements - which is the order that works.");
-                        if (ImGui.Button("Import ytyp...")) RequestImportYtyp?.Invoke();
+            if (ImGui.Button("Import MLO (.ytyp)...")) RequestImportYtyp?.Invoke();
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Load an interior .ytyp: every entity is placed at its exact position.\nCustom props are read from the folder the .ytyp lives in;\nbase-game props come from your GTA V install.");
             ImGui.SameLine();
             if (ImGui.Button("Import YMAP...")) RequestImportYmap?.Invoke();
@@ -4512,6 +4521,8 @@ namespace RageLightEditor.Editor
                     ImGui.SetTooltip("Asks for a name, then creates an empty light-only prop: a drawable that\n" +
                                      "carries nothing but lights, plus its archetype.");
                 if (ImGui.MenuItem("Load YTD...")) RequestOpenYtd?.Invoke();
+                if (ImGui.MenuItem("Import MLO (.ytyp)...")) RequestImportYtyp?.Invoke();
+                if (ImGui.IsItemHovered()) ImGui.SetTooltip("Load an interior .ytyp: every entity is placed at its exact position.\nCustom props are read from the folder the .ytyp lives in;\nbase-game props come from your GTA V install.");
                 ImGui.Separator();
                 bool canSave = scene.HasModel;
                 if (ImGui.MenuItem(scene.Files.Count > 1 ? "Save all" : "Save", "Ctrl+S", false, canSave))
