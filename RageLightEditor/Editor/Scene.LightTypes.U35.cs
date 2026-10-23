@@ -19,6 +19,20 @@ namespace RageLightEditor.Editor
             return n;
         }
 
+        public int SelectType_U35(int slot)
+        {
+            SelectedIndices.Clear();
+            for (int i = 0; i < Lights.Count; i++)
+            {
+                var l = Lights[i];
+                if (l == null || TypeSlot_U35(l.Type) != slot) continue;
+                var f = OwnerFile(l);
+                if (f != null && !f.Visible) continue;
+                SelectedIndices.Add(i);
+            }
+            return SelectedIndices.Count;
+        }
+
         public int SetFlagsForType_U35(int slot, uint mask, bool on)
         {
             if (mask == 0) return 0;

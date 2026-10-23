@@ -21,8 +21,29 @@ namespace RageLightEditor.Editor
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip($"Off: {Scene.TypeNames_U35[t].ToLowerInvariant()} lights stop lighting the viewport and lose their markers,\nand a click can't pick them. Nothing in your files changes.");
                 ImGui.SameLine(130);
-                ImGui.TextDisabled($"{scene.CountType_U35(t)}");
+                int count = scene.CountType_U35(t);
+                ImGui.TextDisabled($"{count}");
+                ImGui.SameLine(175);
+                if (count == 0) ImGui.BeginDisabled();
+                if (ImGui.SmallButton($"Select all##lt_sel{t}"))
+                {
+                    if (!scene.ShowType_U35[t]) scene.ShowType_U35[t] = true;
+                    int n = scene.SelectType_U35(t);
+                    bulkFlagStatus_U35 = $"Selected {n} {Scene.TypeNames_U35[t].ToLowerInvariant()} light{(n == 1 ? "" : "s")} - Light parameters now edits them all together.";
+                }
+                if (count == 0) ImGui.EndDisabled();
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    ImGui.SetTooltip($"Select every {Scene.TypeNames_U35[t].ToLowerInvariant()} light. Then any value you change in Light parameters\nis set on all of them; their other values stay as they are.");
             }
+
+            ImGui.Spacing();
+            ImGui.TextDisabled("MARKERS");
+            bool fade = settings.MarkerFadeU36;
+            if (ImGui.Checkbox("Fade with distance##lt_fade", ref fade)) { settings.MarkerFadeU36 = fade; settings.Save(); }
+            if (ImGui.IsItemHovered()) ImGui.SetTooltip("On: markers fade out between 15 and 35 m, so you mostly see the room you're in.\nOff: every marker shows at full strength however far it is.");
+            bool occ = settings.MarkerOccludeU36;
+            if (ImGui.Checkbox("Hide behind walls##lt_occ", ref occ)) { settings.MarkerOccludeU36 = occ; settings.Save(); }
+            if (ImGui.IsItemHovered()) ImGui.SetTooltip("On: a marker only shows where you can see the light.\nOff: markers draw on top of everything, through walls and floors.");
 
             ImGui.Spacing();
             ImGui.Separator();

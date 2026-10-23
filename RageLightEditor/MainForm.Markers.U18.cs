@@ -51,10 +51,11 @@ namespace RageLightEditor
                 }
                 var toCam = cam - p;
                 float dist = toCam.Length();
-                float fade = MarkerFade_U34(dist);
+                float fade = settings.MarkerFadeU36 ? MarkerFade_U34(dist) : 1.0f;
                 if (fade <= 0.02f) continue;
-                if (dist > 1e-4f) p += toCam / dist * Math.Min(MarkerPullMax_U34, dist * 0.5f);
-                MaxLightIcon_U35(p, dir, l, MarkerWire_U35, fade, true);
+                bool occlude = settings.MarkerOccludeU36;
+                if (occlude && dist > 1e-4f) p += toCam / dist * Math.Min(MarkerPullMax_U34, dist * 0.5f);
+                MaxLightIcon_U35(p, dir, l, MarkerWire_U35, fade, occlude);
             }
         }
 

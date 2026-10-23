@@ -47,6 +47,20 @@ namespace RageLightEditor
                 check("light types: one undo puts every light back", sc.Lights.All(l => (l.Flags & shadows) == 0), "");
                 int none = sc.SetFlagsForType_U35(1, 0, true);
                 check("light types: no flags ticked changes nothing", none == 0, "");
+
+                foreach (var l in sc.Lights) l.Intensity = 3f;
+                sc.Lights[0].Falloff = 7f;
+                int picked = sc.SelectType_U35(1);
+                check("light types: Select all picks every spot light and nothing else",
+                      picked == spots && sc.SelectedIndices.All(i => sc.Lights[i].Type == LightType.Spot), $"{picked} selected");
+                var prim = sc.SelectedLight;
+                var before = Scene.CloneLight(prim);
+                prim.Intensity = 42f;
+                sc.ApplyEditToSelection(before, prim);
+                check("light types: ...so one change in Light parameters sets it on all of them",
+                      sc.Lights.Where(l => l.Type == LightType.Spot).All(l => l.Intensity == 42f) &&
+                      sc.Lights.Where(l => l.Type != LightType.Spot).All(l => l.Intensity == 3f), "");
+                check("light types: ...and leaves their other values alone", sc.Lights[0].Falloff == 7f || ReferenceEquals(sc.Lights[0], prim), $"falloff {sc.Lights[0].Falloff}");
             }
             catch (Exception ex) { check("light types: the test ran", false, ex.ToString()); }
             finally { try { Directory.Delete(dir, true); } catch { } }

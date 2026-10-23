@@ -45,6 +45,8 @@ namespace RageLightEditor.Editor
         public bool ControlTimeOfDay { get; set; } = true;
         public bool ProjectAutoCalcFlags { get; set; } = true;
         public bool ProjectAutoCalcExtents { get; set; } = true;
+        public bool MarkerFadeU36 { get; set; } = true;
+        public bool MarkerOccludeU36 { get; set; } = true;
         public bool ProjectDisplayEntityIndexes { get; set; } = false;
         public bool WorldGrass { get; set; } = true;
         public float WorldGrassDistance { get; set; } = 1.0f;
