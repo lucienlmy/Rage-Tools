@@ -61,6 +61,12 @@ namespace RageLightEditor
                       sc.Lights.Where(l => l.Type == LightType.Spot).All(l => l.Intensity == 42f) &&
                       sc.Lights.Where(l => l.Type != LightType.Spot).All(l => l.Intensity == 3f), "");
                 check("light types: ...and leaves their other values alone", sc.Lights[0].Falloff == 7f || ReferenceEquals(sc.Lights[0], prim), $"falloff {sc.Lights[0].Falloff}");
+                sc.SelectedIndices.Clear();
+                for (int i = 0; i < sc.Lights.Count; i++) sc.SelectedIndices.Add(i);
+                int dropped = sc.DeselectType_U35(1);
+                check("light types: Deselect takes only that type out of the selection",
+                      dropped == spots && sc.SelectedIndices.Count == all - spots && sc.SelectedIndices.All(i => sc.Lights[i].Type != LightType.Spot),
+                      $"dropped {dropped}, {sc.SelectedIndices.Count} left");
             }
             catch (Exception ex) { check("light types: the test ran", false, ex.ToString()); }
             finally { try { Directory.Delete(dir, true); } catch { } }

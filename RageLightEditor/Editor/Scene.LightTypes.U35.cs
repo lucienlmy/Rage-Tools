@@ -33,6 +33,9 @@ namespace RageLightEditor.Editor
             return SelectedIndices.Count;
         }
 
+        public int DeselectType_U35(int slot) =>
+            SelectedIndices.RemoveAll(i => i >= 0 && i < Lights.Count && Lights[i] != null && TypeSlot_U35(Lights[i].Type) == slot);
+
         public int SetFlagsForType_U35(int slot, uint mask, bool on)
         {
             if (mask == 0) return 0;

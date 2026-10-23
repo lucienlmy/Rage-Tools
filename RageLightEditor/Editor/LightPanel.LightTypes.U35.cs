@@ -49,6 +49,19 @@ namespace RageLightEditor.Editor
                 if (count == 0) ImGui.EndDisabled();
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
                     ImGui.SetTooltip($"Select every {Scene.TypeNames_U35[t].ToLowerInvariant()} light. Then any value you change in Light parameters\nis set on all of them; their other values stay as they are.");
+                ImGui.SameLine();
+                int selOfType = 0;
+                foreach (var si in scene.SelectedIndices)
+                    if (si >= 0 && si < scene.Lights.Count && scene.Lights[si] != null && Scene.TypeSlot_U35(scene.Lights[si].Type) == t) selOfType++;
+                if (selOfType == 0) ImGui.BeginDisabled();
+                if (ImGui.SmallButton($"Deselect##lt_desel{t}"))
+                {
+                    int n = scene.DeselectType_U35(t);
+                    bulkFlagStatus_U35 = $"Took {n} {Scene.TypeNames_U35[t].ToLowerInvariant()} light{(n == 1 ? "" : "s")} out of the selection.";
+                }
+                if (selOfType == 0) ImGui.EndDisabled();
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    ImGui.SetTooltip($"Take every {Scene.TypeNames_U35[t].ToLowerInvariant()} light out of the selection ({selOfType} selected now).\nThe other types stay selected.");
             }
 
             ImGui.Spacing();
