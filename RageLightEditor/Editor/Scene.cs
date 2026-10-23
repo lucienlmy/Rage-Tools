@@ -671,6 +671,7 @@ namespace RageLightEditor.Editor
                 var owner = OwnerFile(al);
                 if (only != null && owner != only) continue;
                 if (owner != null && !owner.Visible) continue;
+                if (!TypeShown_U35(al.Type)) continue;
                 if (!LightDefs.IsActiveAtHour(al.TimeFlags, previewHour)) continue;
 
                 int copies = 1 + (owner?.ExtraPlacements.Count ?? 0);

@@ -1686,6 +1686,8 @@ namespace RageLightEditor.Editor
             if (Header("Import from GTA V")) DrawGameSection();
             if (Header("Timecycle")) DrawTimecycleSection();
 
+            if (!MaterialMode && scene.Lights.Count > 0 && Header("Light types")) DrawLightTypes_U35();
+
             if (!MaterialMode)
             {
                 var sel = scene.SelectedLight;

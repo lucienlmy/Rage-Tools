@@ -5707,6 +5707,7 @@ namespace RageLightEditor
             float bestT = float.MaxValue;
             for (int i = 0; i < scene.Lights.Count; i++)
             {
+                if (!scene.TypeShown_U35(scene.Lights[i].Type)) continue;
                 var inst = scene.GetInstance(scene.Lights[i]);
                 float dist = Vector3.Distance(camera.Position, inst.WorldPosition);
                 float radius = Math.Max(dist * 0.02f, 0.05f);
@@ -8388,6 +8389,7 @@ namespace RageLightEditor
                 if (!draw) continue;
 
                 var l = scene.Lights[i];
+                if (!isSel && !scene.TypeShown_U35(l.Type)) continue;
                 var inst = scene.GetInstance(l);
                 float alpha = isSel ? 0.9f : 0.25f;
                 var col = new Vector4(l.ColorR / 255.0f, l.ColorG / 255.0f, l.ColorB / 255.0f, alpha);
