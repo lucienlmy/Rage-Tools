@@ -38,6 +38,31 @@ namespace RageLightEditor
                          Vector2.Distance(gs, new Vector2(x + 1, y + 2)) <= Vector2.Distance(s, new Vector2(x + 1, y + 2)) + 2.0f) nearer++;
                 else missed++;
             }
+            int coneTried = 0, coneHit = 0;
+            var segsTmp = new System.Collections.Generic.List<(Vector3 a, Vector3 b)>();
+            for (int i = 0; i < scene.Lights.Count; i++)
+            {
+                var l = scene.Lights[i];
+                if (l.Type != CodeWalker.GameFiles.LightType.Spot) continue;
+                var inst = scene.GetInstance(l);
+                var p = inst.WorldPosition;
+                if (!LightScreenPos_U39(p, out var s0) || s0.X < w * 0.24f || s0.X > w * 0.64f || s0.Y < 80 || s0.Y > h - 80) continue;
+                var dir = inst.WorldDirection.LengthSquared() > 1e-6f ? Vector3.Normalize(inst.WorldDirection) : -Vector3.UnitZ;
+                MaxIconSegs_U40(p, dir, l, segsTmp);
+                foreach (var target in new[] { segsTmp[segsTmp.Count - 1].b, segsTmp[4].a })
+                {
+                    if (!LightScreenPos_U39(target, out var st)) continue;
+                    if (Vector2.Distance(st, s0) < LightPickPx_U39 + 4f) continue;
+                    coneTried++;
+                    scene.SelectedIndices.Clear();
+                    int x = (int)st.X + 3, y = (int)st.Y - 2;
+                    OnMouseDownEv(this, new MouseEventArgs(MouseButtons.Right, 1, x, y, 0));
+                    OnMouseMoveEv(this, new MouseEventArgs(MouseButtons.Right, 0, x + 2, y + 1, 0));
+                    OnMouseUpEv(this, new MouseEventArgs(MouseButtons.Right, 1, x + 2, y + 1, 0));
+                    if (scene.SelectedIndex == i) coneHit++;
+                }
+            }
+            Console.WriteLine($"PICKPROBE clicks on a spot's cone ring or target line, away from its centre: {coneTried} tried, {coneHit} picked that light");
             settings.MarkerFadeU36 = fadeWas; settings.MarkerOccludeU36 = occWas;
             Console.WriteLine($"PICKPROBE right-clicks 5 px off a light with a 3 px wobble: {tried} tried, {hit} picked that light, {nearer} picked an even nearer one, {missed} missed; time of day {(Math.Abs(panel.PreviewHour - hourWas) < 0.001f ? "unchanged" : "CHANGED")}");
         }

@@ -61,12 +61,22 @@ namespace RageLightEditor
             }
         }
 
+        private readonly System.Collections.Generic.List<(Vector3 a, Vector3 b)> iconSegs_U40 = new System.Collections.Generic.List<(Vector3 a, Vector3 b)>(48);
+
         private void MaxLightIcon_U35(Vector3 p, Vector3 dir, LightAttributes l, Vector4 wire, float fade, bool depth)
         {
-            float r = MarkerSizePx_U35 * camera.WorldPerPixel(p);
             var col = new Vector4(wire.X, wire.Y, wire.Z, wire.W * fade);
             var rim = new Vector4(MarkerRim_U35.X, MarkerRim_U35.Y, MarkerRim_U35.Z, MarkerRim_U35.W * fade);
-            var segs = new System.Collections.Generic.List<(Vector3 a, Vector3 b)>(40);
+            var segs = iconSegs_U40;
+            MaxIconSegs_U40(p, dir, l, segs);
+            foreach (var s in segs) selSegs_U25.Add((s.a, s.b, rim, depth, MarkerRimPx_U35));
+            foreach (var s in segs) selSegs_U25.Add((s.a, s.b, col, depth, MarkerLinePx_U35));
+        }
+
+        internal void MaxIconSegs_U40(Vector3 p, Vector3 dir, LightAttributes l, System.Collections.Generic.List<(Vector3 a, Vector3 b)> segs)
+        {
+            segs.Clear();
+            float r = MarkerSizePx_U35 * camera.WorldPerPixel(p);
             var ax = Vector3.Cross(dir, Math.Abs(dir.Z) < 0.9f ? Vector3.UnitZ : Vector3.UnitX);
             ax.Normalize();
             var bx = Vector3.Cross(dir, ax);
@@ -124,8 +134,6 @@ namespace RageLightEditor
                     break;
                 }
             }
-            foreach (var s in segs) selSegs_U25.Add((s.a, s.b, rim, depth, MarkerRimPx_U35));
-            foreach (var s in segs) selSegs_U25.Add((s.a, s.b, col, depth, MarkerLinePx_U35));
         }
     }
 }
