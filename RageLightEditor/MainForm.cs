@@ -5410,7 +5410,7 @@ namespace RageLightEditor
                 if (orbiting && (gizmo == null || !gizmo.Dragging) && !SequenceOwnsCamera) camera.Orbit(dx, dy);
                 if (panning && !SequenceOwnsCamera) camera.Pan(-dx, dy);
             }
-            if (rightDragging && panel.ControlTimeOfDay && !ImGuiWantsMouse && !SequenceOwnsCamera
+            if (rightDragging && panel.ControlTimeOfDay && !ImGuiWantsMouse && !SequenceOwnsCamera && mouseDownDrag > ClickSlopPx_U39
                 && !worldGizmo.Dragging && (gizmo == null || !gizmo.Dragging)
                 && (dx != 0 || dy != 0))
             {
@@ -5706,22 +5706,7 @@ namespace RageLightEditor
 
         private bool PickLight(int mx, int my)
         {
-            var ray = camera.GetPickRay(mx, my, deviceResources.Width, deviceResources.Height);
-            int best = -1;
-            float bestT = float.MaxValue;
-            for (int i = 0; i < scene.Lights.Count; i++)
-            {
-                if (!scene.TypeShown_U35(scene.Lights[i].Type)) continue;
-                var inst = scene.GetInstance(scene.Lights[i]);
-                float dist = Vector3.Distance(camera.Position, inst.WorldPosition);
-                float radius = Math.Max(dist * 0.02f, 0.05f);
-                var sphere = new BoundingSphere(inst.WorldPosition, radius);
-                if (ray.Intersects(ref sphere, out float t) && t < bestT)
-                {
-                    bestT = t;
-                    best = i;
-                }
-            }
+            int best = LightUnderCursor_U39(mx, my);
             if (best >= 0)
             {
                 bool ctrl = (ModifierKeys & Keys.Control) != 0;

@@ -23,7 +23,7 @@ namespace RageLightEditor
         }
 
         private bool RightReleaseIsClick_T1(float dragPixels)
-            => rightDragging && !timeScrubbing && !rightPressConsumed_T1 && dragPixels < 5.0f && !ImGuiWantsMouse;
+            => rightDragging && !timeScrubbing && !rightPressConsumed_T1 && dragPixels < ClickSlopPx_U39 && !ImGuiWantsMouse;
 
         private void RightViewportClick_T1(int x, int y)
         {
