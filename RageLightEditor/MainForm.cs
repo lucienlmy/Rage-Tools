@@ -5317,6 +5317,7 @@ namespace RageLightEditor
                     if (!gizmoConsumedClick)
                         gizmoConsumedClick = gizmo != null &&
                             gizmo.MouseDown(camera, e.X, e.Y, deviceResources.Width, deviceResources.Height, shift, alt);
+                    if (!gizmoConsumedClick) gizmoConsumedClick = BrushSelectDown_U37(e.X, e.Y);
                     if (!gizmoConsumedClick) MloCreatorMouseDown_H5(e.X, e.Y, shift, alt, ref gizmoConsumedClick);
                     if (!gizmoConsumedClick) TerrainMouseDown_R4(e.X, e.Y, false, ref gizmoConsumedClick);
                 }
@@ -5361,6 +5362,7 @@ namespace RageLightEditor
                 else { bool h5 = false; MloCreatorMouseUp_H5(e.X, e.Y, false, ref h5); }
                 TerrainMouseUp_R4();
                 GrassBrushMouseUp_S5();
+                BrushSelectUp_U37();
                 orbiting = false;
                 gizmoConsumedClick = false;
             }
@@ -5393,7 +5395,9 @@ namespace RageLightEditor
                 { gizmo?.MouseMove(camera, e.X, e.Y, deviceResources.Width, deviceResources.Height); ExtGizmoMouseMove_V69(e.X, e.Y); MloCreatorMouseMove_H5(e.X, e.Y); }
                 TerrainMouseMove_R4(e.X, e.Y, e.Button == MouseButtons.Left, e.Button == MouseButtons.Right);
                 GrassBrushMouseMove_S5(e.X, e.Y, e.Button == MouseButtons.Left);
+                BrushSelectMove_U37(e.X, e.Y, e.Button == MouseButtons.Left);
             }
+            else if (panel.BrushCursor_U37 != null) panel.BrushCursor_U37 = null;
             if (walkMode)
             {
                 if (!ImGuiWantsMouse && (gizmo == null || !gizmo.Dragging) && !SequenceOwnsCamera)

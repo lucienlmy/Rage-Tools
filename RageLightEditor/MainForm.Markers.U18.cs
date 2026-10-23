@@ -34,6 +34,7 @@ namespace RageLightEditor
                 for (int i = 0; i < scene.Lights.Count; i++)
                     Console.WriteLine($"MARKERDUMP {i} {scene.Lights[i].Type} at {scene.GetInstance(scene.Lights[i]).WorldPosition} dist {Vector3.Distance(cam, scene.GetInstance(scene.Lights[i]).WorldPosition):0.0}");
             }
+            BrushProbe_U37();
             for (int i = 0; i < scene.Lights.Count; i++)
             {
                 var l = scene.Lights[i];

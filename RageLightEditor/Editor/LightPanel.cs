@@ -327,6 +327,7 @@ namespace RageLightEditor.Editor
             }
 
             DrawTopBar();
+            DrawBrushCursor_U37();
             if (ShellChrome_U27) DrawShellPopups_U27();
             DrawDockSpace_V30(displayWidth, displayHeight);
             if (WorldMode) DrawWorldToolbar(displayWidth);

@@ -5,6 +5,21 @@ namespace RageLightEditor.Editor
 {
     public partial class LightPanel
     {
+        public bool BrushSelect_U37;
+        public float BrushRadius_U37 = 40f;
+        public Vector2? BrushCursor_U37;
+
+        private void DrawBrushCursor_U37()
+        {
+            if (!BrushSelect_U37 || BrushCursor_U37 == null || WorldMode || MloMode || MaterialMode) return;
+            var dl = ImGui.GetForegroundDrawList();
+            var c = BrushCursor_U37.Value;
+            bool alt = ImGui.GetIO().KeyAlt;
+            uint col = alt ? 0xE05A5AF0u : 0xE05FCB8Bu;
+            dl.AddCircle(c, BrushRadius_U37, 0xC0000000u, 48, 3.0f);
+            dl.AddCircle(c, BrushRadius_U37, col, 48, 1.5f);
+        }
+
         private uint bulkFlagMask_U35;
         private int bulkFlagType_U35;
         private string bulkFlagStatus_U35;
@@ -35,6 +50,31 @@ namespace RageLightEditor.Editor
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
                     ImGui.SetTooltip($"Select every {Scene.TypeNames_U35[t].ToLowerInvariant()} light. Then any value you change in Light parameters\nis set on all of them; their other values stay as they are.");
             }
+
+            ImGui.Spacing();
+            ImGui.TextDisabled("SELECTION");
+            float half = (ImGui.GetContentRegionAvail().X - ImGui.GetStyle().ItemSpacing.X) * 0.5f;
+            bool any = scene.SelectedIndices.Count > 0;
+            if (!any) ImGui.BeginDisabled();
+            if (ImGui.Button($"Deselect all ({scene.SelectedIndices.Count})##lt_desel", new Vector2(half, 0)))
+            {
+                scene.SelectedIndices.Clear();
+                bulkFlagStatus_U35 = "Nothing selected.";
+            }
+            if (!any) ImGui.EndDisabled();
+            ImGui.SameLine();
+            bool brush = BrushSelect_U37;
+            if (brush) ImGui.PushStyleColor(ImGuiCol.Button, UiTheme.Accent);
+            if (ImGui.Button((brush ? "Brush select: on" : "Brush select") + "##lt_brush", new Vector2(half, 0))) BrushSelect_U37 = !BrushSelect_U37;
+            if (brush) ImGui.PopStyleColor();
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Drag with the left mouse button over lights to add them to the selection.\nHold Alt while dragging to take them out again. Turn it off to turn the camera with the left button.");
+            if (BrushSelect_U37)
+            {
+                ImGui.SetNextItemWidth(-90);
+                UiSlider_U28.Float("Brush size##lt_brushr", ref BrushRadius_U37, 10f, 200f, "%.0f px");
+            }
+            ImGui.TextDisabled("Ctrl + right-click a light adds or removes just that one.");
 
             ImGui.Spacing();
             ImGui.TextDisabled("MARKERS");
