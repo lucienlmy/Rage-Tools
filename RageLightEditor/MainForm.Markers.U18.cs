@@ -36,6 +36,7 @@ namespace RageLightEditor
             }
             BrushProbe_U37();
             PickProbe_U39();
+            ShadowProbe_U41();
             for (int i = 0; i < scene.Lights.Count; i++)
             {
                 var l = scene.Lights[i];

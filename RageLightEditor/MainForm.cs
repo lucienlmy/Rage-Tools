@@ -7644,12 +7644,17 @@ namespace RageLightEditor
                 bool camMoved = panel.ShadowMode != 2 &&
                                 Vector3.DistanceSquared(camera.Position, lastShadowPickPos) > 64.0f;
                 if (panel.FlagsChanged) { shadowPickDirty = true; panel.FlagsChanged = false; }
+                int orderSig = ShadowOrderSignature_U41(order);
+                bool freshPick = orderSig != lastShadowOrderSig_U41;
+                if (freshPick) { lastShadowOrderSig_U41 = orderSig; shadowPickDirty = true; }
+                if (now - lastShadowPickTime_U41 >= ShadowRepickSeconds_U41) shadowPickDirty = true;
                 if (camMoved || geomChanged || shadowPickDirty)
                 {
                     lastShadowPickPos = camera.Position;
+                    lastShadowPickTime_U41 = now;
                     shadowPickDirty = false;
-                    cachedDesiredSpots = ToSources(PickShadowLights(order, spotSlotCache, GpuLight.MaxShadowSpots, false));
-                    cachedDesiredCubes = ToSources(PickShadowLights(order, cubeSlotCache, GpuLight.MaxShadowCubes, true));
+                    cachedDesiredSpots = ToSources(PickShadowLights(order, spotSlotCache, GpuLight.MaxShadowSpots, false, freshPick));
+                    cachedDesiredCubes = ToSources(PickShadowLights(order, cubeSlotCache, GpuLight.MaxShadowCubes, true, freshPick));
                 }
                 var desiredSpots = ToIndices(cachedDesiredSpots);
                 var desiredCubes = ToIndices(cachedDesiredCubes);
@@ -8153,10 +8158,10 @@ namespace RageLightEditor
             camera.Translate(move * speed * Math.Min(dt, 0.1f));
         }
 
-        private List<int> PickShadowLights(List<int> order, ShadowSlotCache[] cache, int max, bool isCube)
+        private List<int> PickShadowLights(List<int> order, ShadowSlotCache[] cache, int max, bool isCube, bool fresh = false)
         {
-            float takeoverMargin = DebugNoDwell ? 0.7f : 0.40f;
-            double dwellSeconds = DebugNoDwell ? 0.0 : 4.0;
+            float takeoverMargin = fresh ? 1.0f : DebugNoDwell ? 0.7f : 0.40f;
+            double dwellSeconds = fresh || DebugNoDwell ? 0.0 : 4.0;
             double nowSec = clock.Elapsed.TotalSeconds;
 
             var picked = new List<int>();
