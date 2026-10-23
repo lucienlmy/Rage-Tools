@@ -75,6 +75,7 @@ namespace RageLightEditor
             bool depth = deviceResources.BeginBackbufferWithDepth_U24();
             foreach (var b in selOverlay_U24) AddSelectionBoxEdges_U24(b.pos, b.ori, b.mn, b.mx);
             foreach (var s in selSegs_U25) if (s.depth) AddSeg_U25(s.a, s.b, s.c, s.px);
+            if (depth) AddLightIconsDepth_U34(triRenderer);
             selOverlay_U24.Clear();
             triRenderer.Flush(context, camera.ViewProjMatrix, CommonStates.BlendAlpha,
                 depth ? CommonStates.DepthReadOnly : CommonStates.DepthDisabled);
@@ -83,6 +84,7 @@ namespace RageLightEditor
             navFill_U28.Clear();
             foreach (var s in selSegs_U25) if (!s.depth) AddSeg_U25(s.a, s.b, s.c, s.px);
             AddLightIcons_U26(triRenderer);
+            AddLightIconsDepth_U34(triRenderer);
             selSegs_U25.Clear();
             triRenderer.Flush(context, camera.ViewProjMatrix, CommonStates.BlendAlpha, CommonStates.DepthDisabled);
         }

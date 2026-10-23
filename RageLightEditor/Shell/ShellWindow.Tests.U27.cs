@@ -167,7 +167,9 @@ namespace RageLightEditor.Shell
                     var my = new YdrFile(); my.Load(File.ReadAllBytes(msrc));
                     uint mh = JenkHash.GenHash("rle_u32_shell_lamp");
                     Check("no edited models listed to begin with", !modelsBlock.IsVisible);
-                    form.MarkEditedForTest_U32(mh, my.Drawable, "rle_u32_shell_lamp"); await Frames(600);
+                    form.MarkEditedForTest_U32(mh, my.Drawable, "rle_u32_shell_lamp");
+                    for (int w = 0; w < 30 && modelsList.Children.Count == 0; w++) await Frames(200);
+                    await Frames(200);
                     var mrow = modelsList.Children.OfType<DockPanel>().FirstOrDefault();
                     var mname = mrow?.Children.OfType<TextBlock>().FirstOrDefault();
                     var msave = mrow?.Children.OfType<ShellButton_U27>().FirstOrDefault();

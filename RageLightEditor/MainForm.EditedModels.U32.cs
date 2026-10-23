@@ -91,7 +91,7 @@ namespace RageLightEditor
         private void SaveEditedModelsAsk_U32()
         {
             string folder = WorldEdit.OutputFolder;
-            bool needFolder = editedModels_U32.Values.Any(m => m.Unsaved && m.CanSave && !HasFile_U32(m));
+            bool needFolder = editedModels_U32.Values.Any(m => worldLightUnsaved.Contains(m.Hash) && m.CanSave && !HasFile_U32(m));
             if (needFolder && (string.IsNullOrEmpty(folder) || !Directory.Exists(folder)))
             {
                 using var dlg = new FolderBrowserDialog { Description = "Folder to save the edited models (.ydr / .yft) in", UseDescriptionForTitle = true };
@@ -107,7 +107,7 @@ namespace RageLightEditor
             var failed = new List<string>();
             foreach (var m in editedModels_U32.Values.ToList())
             {
-                if (!m.Unsaved || !m.CanSave) continue;
+                if (!worldLightUnsaved.Contains(m.Hash) || !m.CanSave) continue;
                 string path = HasFile_U32(m) ? m.SavedPath : string.IsNullOrEmpty(folder) ? null : Path.Combine(folder, m.FileName);
                 string err = path == null ? "no folder" : SaveEditedModel_U32(m, path);
                 if (err == null) done++; else failed.Add(m.FileName + " (" + err + ")");

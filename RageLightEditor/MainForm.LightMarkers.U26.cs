@@ -20,7 +20,10 @@ namespace RageLightEditor
         private readonly List<(Vector3 pos, Vector3 dir, LightType type, Vector4 col)> lightIcons_U26 =
             new List<(Vector3 pos, Vector3 dir, LightType type, Vector4 col)>();
 
-        public int LightIconCount_U26 => lightIcons_U26.Count;
+        private readonly List<(Vector3 pos, Vector3 dir, LightType type, Vector4 col)> lightIconsDepth_U34 =
+            new List<(Vector3 pos, Vector3 dir, LightType type, Vector4 col)>();
+
+        public int LightIconCount_U26 => lightIcons_U26.Count + lightIconsDepth_U34.Count;
 
         public static Vector4 LightIconColour_U26(byte r, byte g, byte b)
         {
@@ -62,51 +65,58 @@ namespace RageLightEditor
             }
         }
 
-        private void AddLightIcons_U26(TriRenderer tr)
+        private void AddLightIcons_U26(TriRenderer tr) => AddLightIcons_U26(tr, lightIcons_U26);
+
+        private void AddLightIconsDepth_U34(TriRenderer tr) => AddLightIcons_U26(tr, lightIconsDepth_U34);
+
+        private void AddLightIcons_U26(TriRenderer tr, List<(Vector3 pos, Vector3 dir, LightType type, Vector4 col)> icons)
         {
-            if (lightIcons_U26.Count == 0) return;
+            if (icons.Count == 0) return;
             var cp = camera.Position;
             var (sr, su, _) = GizmoStyle.ScreenBasis(camera);
-            foreach (var ic in lightIcons_U26)
+            foreach (var ic in icons)
             {
                 float wpp = camera.WorldPerPixel(ic.pos);
                 float r = LightIconPx_U26 * wpp;
                 float rim = 1.5f * wpp;
+                float a = ic.col.W;
+                var rimCol = new Vector4(LightIconRim_U26.X, LightIconRim_U26.Y, LightIconRim_U26.Z, LightIconRim_U26.W * a);
+                var white = new Vector4(1, 1, 1, a);
                 switch (ic.type)
                 {
                     case LightType.Spot:
                     {
                         var dir = ic.dir;
-                        var a = Vector3.Cross(dir, Math.Abs(dir.Z) < 0.9f ? Vector3.UnitZ : Vector3.UnitX);
-                        a.Normalize();
-                        var b = Vector3.Cross(dir, a);
+                        var ax = Vector3.Cross(dir, Math.Abs(dir.Z) < 0.9f ? Vector3.UnitZ : Vector3.UnitX);
+                        ax.Normalize();
+                        var bx = Vector3.Cross(dir, ax);
                         var baseC = ic.pos + dir * (SpotIconLenPx_U26 * wpp);
                         float br = r * 1.05f;
-                        tr.AddCone(ic.pos - dir * rim, baseC + dir * rim, a, b, br + rim, LightIconRim_U26, LightIconRim_U26, 20);
-                        tr.AddDisc(baseC + dir * rim, a, b, br + rim, LightIconRim_U26, LightIconRim_U26, 20);
-                        var dark = new Vector4(ic.col.X * 0.55f, ic.col.Y * 0.55f, ic.col.Z * 0.55f, 1f);
-                        tr.AddCone(ic.pos, baseC, a, b, br, ic.col, dark, 20);
-                        tr.AddDisc(baseC, a, b, br, ic.col, ic.col, 20);
-                        tr.AddDiscAA(ic.pos, sr, su, r * 0.45f, 0.75f * wpp, new Vector4(1, 1, 1, 1), 16);
+                        tr.AddCone(ic.pos - dir * rim, baseC + dir * rim, ax, bx, br + rim, rimCol, rimCol, 20);
+                        tr.AddDisc(baseC + dir * rim, ax, bx, br + rim, rimCol, rimCol, 20);
+                        var dark = new Vector4(ic.col.X * 0.55f, ic.col.Y * 0.55f, ic.col.Z * 0.55f, a);
+                        tr.AddCone(ic.pos, baseC, ax, bx, br, ic.col, dark, 20);
+                        tr.AddDisc(baseC, ax, bx, br, ic.col, ic.col, 20);
+                        tr.AddDiscAA(ic.pos, sr, su, r * 0.45f, 0.75f * wpp, white, 16);
                         break;
                     }
                     case LightType.Capsule:
                     {
                         var half = ic.dir * (CapsuleIconLenPx_U26 * 0.5f * wpp);
-                        tr.AddCapsuleAA(ic.pos - half, ic.pos + half, cp, r * 0.75f + rim, 0.75f * wpp, LightIconRim_U26);
+                        tr.AddCapsuleAA(ic.pos - half, ic.pos + half, cp, r * 0.75f + rim, 0.75f * wpp, rimCol);
                         tr.AddCapsuleAA(ic.pos - half, ic.pos + half, cp, r * 0.75f, 0.75f * wpp, ic.col);
                         break;
                     }
                     default:
                     {
-                        tr.AddDiscAA(ic.pos, sr, su, r + rim, 0.75f * wpp, LightIconRim_U26, 24);
+                        tr.AddDiscAA(ic.pos, sr, su, r + rim, 0.75f * wpp, rimCol, 24);
                         tr.AddDiscAA(ic.pos, sr, su, r, 0.75f * wpp, ic.col, 24);
-                        tr.AddDiscAA(ic.pos, sr, su, r * 0.4f, 0.75f * wpp, new Vector4(1, 1, 1, 1), 16);
+                        tr.AddDiscAA(ic.pos, sr, su, r * 0.4f, 0.75f * wpp, white, 16);
                         break;
                     }
                 }
             }
-            lightIcons_U26.Clear();
+            icons.Clear();
         }
     }
 }
