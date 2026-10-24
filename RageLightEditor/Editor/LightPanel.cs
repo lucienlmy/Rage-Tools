@@ -1688,6 +1688,7 @@ namespace RageLightEditor.Editor
             if (Header("Timecycle")) DrawTimecycleSection();
 
             if (!MaterialMode && scene.Lights.Count > 0 && Header("Light types")) DrawLightTypes_U35();
+            if (!MaterialMode && ShadowRooms_U44.Count > 0 && Header("Shadow limit per room")) DrawShadowRooms_U44();
 
             if (!MaterialMode)
             {

@@ -310,6 +310,7 @@ namespace RageLightEditor.Editor
                         Flags = cd.flags,
                         Scale = new Vector3(cd.scaleXY, cd.scaleXY, cd.scaleZ),
                     };
+                    result.NoteRoom_U44(info, mlo, ent, room, instPos);
 
                     var qLocal = new Quaternion(cd.rotation.X, cd.rotation.Y, cd.rotation.Z, cd.rotation.W);
                     if (qLocal != Quaternion.Identity) qLocal = Quaternion.Invert(qLocal);

@@ -99,6 +99,10 @@ namespace RageLightEditor.Editor
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("On: a marker only shows where you can see the light.\nOff: markers draw on top of everything, through walls and floors.");
 
             ImGui.Spacing();
+            ImGui.TextDisabled("SHADOWS");
+            DrawAutoShadows_U45();
+
+            ImGui.Spacing();
             ImGui.Separator();
             ImGui.TextDisabled("FLAGS ON EVERY LIGHT OF A TYPE");
             ImGui.SetNextItemWidth(-1);

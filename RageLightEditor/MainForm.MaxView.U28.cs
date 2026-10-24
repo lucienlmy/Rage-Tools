@@ -110,6 +110,7 @@ namespace RageLightEditor
             if (r.Z - r.X < 260 || r.W - r.Y < 200) return;
             DrawViewLabels_U28(r);
             DrawTripod_U28(r);
+            DrawShadowLimitBadge_U44(r);
         }
 
         private const ImGuiWindowFlags OverlayFlags_U28 =

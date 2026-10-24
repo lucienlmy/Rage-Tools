@@ -84,6 +84,8 @@ namespace RageLightEditor.Editor
             MloModel?.Dispose();
             MloModel = model;
             MloInfo = info;
+            RoomEntities_U44.Clear();
+            if (info != null) RoomEntities_U44.AddRange(info.Entities);
             GeometryVersion++;
         }
 
@@ -94,6 +96,7 @@ namespace RageLightEditor.Editor
             foreach (var m in model.Meshes)
                 MloModel.Bounds = BoundingBox.Merge(MloModel.Bounds, m.WorldBounds);
             if (MloInfo != null && !ReferenceEquals(MloInfo, info)) info.Interiors.InsertRange(0, MloInfo.Interiors);
+            if (!ReferenceEquals(MloInfo, info)) RoomEntities_U44.AddRange(info.Entities);
             MloInfo = info;
             GeometryVersion++;
         }
@@ -103,6 +106,7 @@ namespace RageLightEditor.Editor
             MloModel?.Dispose();
             MloModel = null;
             MloInfo = null;
+            RoomEntities_U44.Clear();
             GeometryVersion++;
         }
         public IEnumerable<RenderMesh> AllMeshes => Models.SelectMany(m => m.Meshes);
