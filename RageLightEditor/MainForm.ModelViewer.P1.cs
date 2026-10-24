@@ -226,6 +226,7 @@ namespace RageLightEditor
 
         private void ServiceModelViewer_P1()
         {
+            UpdateViewerCollision_U48();
             ServiceModelViewTextureExport_Q1();
             ServiceModelViewTextureDump_S3();
             ServiceModelViewerExtras_V22();
@@ -375,6 +376,7 @@ namespace RageLightEditor
                     triRenderer.AddTriangles(modelViewCollision.Vertices, Vector3.Zero);
                     triRenderer.Flush(ctx, cam.ViewProjMatrix, CommonStates.BlendAlpha, CommonStates.DepthDefault);
                 }
+                DrawViewerCollision_U48(ctx, cam);
 
                 if (ModelView.ShowGrid || ModelView.ShowAxes)
                 {

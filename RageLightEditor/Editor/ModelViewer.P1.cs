@@ -61,6 +61,9 @@ namespace RageLightEditor.Editor
         public bool ShowTextures = true;
         public bool ShowGrid = true;
         public bool ShowAxes = true;
+        public bool ShowCollision_U48;
+        public int CollisionParts_U48;
+        public int CollisionTriangles_U48;
         public int LightSetup;
         public static readonly string[] LightSetupLabels = { "Studio (3-point)", "The file's own lights", "Flat ambient" };
         public float AmbientLevel = 0.22f;
@@ -305,6 +308,8 @@ namespace RageLightEditor.Editor
             ImGui.Checkbox("Grid", ref ShowGrid);
             ImGui.SameLine();
             ImGui.Checkbox("Axes", ref ShowAxes);
+            ImGui.SameLine();
+            DrawCollisionToggle_U48("Collision");
             ImGui.SameLine();
             ImGui.Checkbox("Cull", ref BackfaceCulling);
             if (ImGui.IsItemHovered())
@@ -699,6 +704,7 @@ namespace RageLightEditor.Editor
             ImGui.SameLine();
             ImGui.TextDisabled($"({GridStep:0.##} m cells)");
             ImGui.Checkbox("Axes", ref ShowAxes);
+            DrawCollisionToggle_U48("Collision##opt");
 
             ImGui.Spacing(); ImGui.Separator();
             ImGui.TextDisabled("LIGHTING");
