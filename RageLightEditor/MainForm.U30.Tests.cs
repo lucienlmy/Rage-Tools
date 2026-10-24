@@ -17,6 +17,7 @@ namespace RageLightEditor
             MloLibrariesTest_U33(check);
             MarkerFadeTest_U34(check);
             LightTypesTest_U35(check);
+            MultiEditTest_U43(check);
         }
 
         private void CinematicEverywhereTest_U31(Action<string, bool, string> check)

@@ -5409,6 +5409,14 @@ namespace RageLightEditor.Editor
             {
                 ImGui.TextColored(AccentText(),
                     $"Editing {scene.SelectedIndices.Count} lights together - every change applies to all of them");
+                bool rel = scene.MultiEditRelative_U43;
+                if (ImGui.Checkbox("Keep each light's own values##u43rel", ref rel)) scene.MultiEditRelative_U43 = rel;
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("On: a change moves every light from where it already is - doubling the intensity doubles\n" +
+                                     "each light's own intensity, so brighter lights stay brighter. Cone angles move by the\n" +
+                                     "same number of degrees. Colours are still set to the same colour on all of them.\n" +
+                                     "Off: every selected light is set to exactly the value you type.\n" +
+                                     "Flags always change only the flag you tick, never the others.");
             }
             int igroup = scene.InstanceGroup(l);
             if (igroup > 0)
