@@ -1170,6 +1170,8 @@ namespace RageLightEditor.Editor
             SameLineIfFits(saveLabel);
             if (!canSave) ImGui.BeginDisabled();
             if (ImGui.SmallButton(saveLabel)) RequestSave?.Invoke();
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                ImGui.SetTooltip("Writes only the props whose lights you changed - the others are left alone.");
             if (!canSave) ImGui.EndDisabled();
             SameLineIfFits("Save As...");
             if (!canSave) ImGui.BeginDisabled();

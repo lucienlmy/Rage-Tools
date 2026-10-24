@@ -30,6 +30,7 @@ namespace RageLightEditor.Editor
         public RenderModel Model;
         public Skeleton Skeleton;
         public bool Dirty;
+        public List<LightAttributes> SavedLights_U47;
         public bool Visible = true;
         public string Name => System.IO.Path.GetFileName(Path);
 
@@ -155,7 +156,12 @@ namespace RageLightEditor.Editor
         public bool Dirty
         {
             get => Files.Any(f => f.Dirty);
-            set { if (ExternalEditing && value) return; foreach (var f in Files) f.Dirty = value; }
+            set
+            {
+                if (ExternalEditing && value) return;
+                if (value) { MarkChangedFiles_U47(); return; }
+                foreach (var f in Files) f.Dirty = false;
+            }
         }
 
         public bool ExternalEditing;
@@ -275,6 +281,7 @@ namespace RageLightEditor.Editor
                 }
 
                 Files.Add(lf);
+                RememberSaved_U47(lf);
                 foreach (var d in MaterialEditing.Drawables(lf)) ShaderPresets.HarvestAll(d);
                 GeometryVersion++;
                 undoStack.Clear();
@@ -328,6 +335,7 @@ namespace RageLightEditor.Editor
             if (extraPlacements != null) lf.ExtraPlacements.AddRange(extraPlacements);
             Files.Add(lf);
             AppendLights(lf, lights);
+            RememberSaved_U47(lf);
             GeometryVersion++;
             return lf;
         }
@@ -1231,12 +1239,14 @@ namespace RageLightEditor.Editor
                 return;
             }
 
+            LastSaved_U47.Clear();
             foreach (var f in Files)
             {
                 if (f.ReadOnly) continue;
-                if (f.Dirty || path == null)
+                if (f.Dirty || IsUnsaved(f))
                 {
                     SaveFile(f, f.Path);
+                    LastSaved_U47.Add(f);
                 }
             }
         }
@@ -1303,6 +1313,7 @@ namespace RageLightEditor.Editor
             }
             File.WriteAllBytes(path, data);
             f.Dirty = false;
+            RememberSaved_U47(f);
         }
 
         public void SyncLightsToResource()

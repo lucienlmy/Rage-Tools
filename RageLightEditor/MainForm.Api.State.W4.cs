@@ -462,7 +462,7 @@ namespace RageLightEditor
 
         private string Wrote_W4(string path, string was, string now)
         {
-            scene.Dirty = true;
+            scene.MarkAllDirty_U47();
             return "{\"path\":" + DccBridgeProtocol.S(path) + ",\"was\":" + was + ",\"now\":" + now + "}";
         }
 
@@ -503,7 +503,7 @@ namespace RageLightEditor
             try { returned = method.Invoke(method.IsStatic ? null : owner, values); }
             catch (Exception ex) { throw new ApiRefused("'" + name + "' threw: " + (ex.InnerException ?? ex).Message); }
 
-            scene.Dirty = true;
+            scene.MarkAllDirty_U47();
             var sb = new StringBuilder("{\"called\":").Append(DccBridgeProtocol.S(method.Name))
                 .Append(",\"returned\":").Append(ToJson_W4(returned, 1));
             bool anyOut = ps.Any(p => p.IsOut || p.ParameterType.IsByRef);

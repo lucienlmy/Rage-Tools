@@ -1025,7 +1025,9 @@ namespace RageLightEditor
             {
                 scene.Save();
                 Editor.UiSound.Success();
-                AfterSaveFiveM_U12(scene.Files);
+                panel.MloStatus = scene.LastSaved_U47.Count == 0 ? "Nothing to save - no prop has edited lights." :
+                    $"Saved {scene.LastSaved_U47.Count} prop{(scene.LastSaved_U47.Count == 1 ? "" : "s")} with edited lights: {string.Join(", ", scene.LastSaved_U47.Take(6).Select(f => f.Name))}{(scene.LastSaved_U47.Count > 6 ? " ..." : "")}";
+                AfterSaveFiveM_U12(scene.LastSaved_U47);
             }
             catch (Exception ex)
             {
