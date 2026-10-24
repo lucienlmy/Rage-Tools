@@ -1770,9 +1770,18 @@ namespace RageLightEditor
                 var combined = new RenderModel { Name = Path.GetFileNameWithoutExtension(paths[0]) };
                 MloImportResult merged = null;
                 var allProps = new List<MloProp>();
+                var skippedYmaps = new List<string>();
                 foreach (var p in paths)
                 {
-                    var r = mloImporter.ImportYmap(p, out var m, s => panel.MloStatus = s);
+                    MloImportResult r;
+                    RenderModel m;
+                    try { r = mloImporter.ImportYmap(p, out m, s => panel.MloStatus = s); }
+                    catch (Exception ex)
+                    {
+                        skippedYmaps.Add($"{Path.GetFileName(p)} ({ex.Message.TrimEnd('.')})");
+                        Console.WriteLine($"YMAPSKIP {Path.GetFileName(p)}: {ex.Message}");
+                        continue;
+                    }
                     combined.Meshes.AddRange(m.Meshes);
                     foreach (var pr in r.Props) if (!allProps.Contains(pr)) allProps.Add(pr);
                     if (merged == null) { merged = r; }
@@ -1794,7 +1803,14 @@ namespace RageLightEditor
                         else if (r.HasFocus) merged.FocusBounds = BoundingBox.Merge(merged.FocusBounds, r.FocusBounds);
                     }
                 }
-                if (paths.Length > 1) merged.MloName = $"{paths.Length} ymaps";
+                if (merged == null)
+                {
+                    panel.MloStatus = skippedYmaps.Count > 0
+                        ? $"None of the {skippedYmaps.Count} .ymap file(s) had anything to place:\n" + string.Join("\n", skippedYmaps.Take(6))
+                        : "Nothing to import.";
+                    return;
+                }
+                if (paths.Length - skippedYmaps.Count > 1) merged.MloName = $"{paths.Length - skippedYmaps.Count} ymaps";
 
                 bool anyBounds = false;
                 void Grow(BoundingBox b)
@@ -1831,9 +1847,12 @@ namespace RageLightEditor
                     : "";
                 if (merged.VegetationSkipped > 0)
                     lodNote += $"\n{merged.VegetationSkipped} plant(s) skipped";
+                if (skippedYmaps.Count > 0)
+                    lodNote += $"\nSkipped {skippedYmaps.Count} .ymap(s) with nothing to place (occlusion, LOD lights...): " +
+                               string.Join(", ", skippedYmaps.Take(4)) + (skippedYmaps.Count > 4 ? ", ..." : "");
 
                 panel.MloStatus = $"Imported {merged.Placed}/{merged.EntityCount} " +
-                    $"from {paths.Length} ymap(s) in {merged.Seconds:0.00}s{lodNote}\n" +
+                    $"from {paths.Length - skippedYmaps.Count} ymap(s) in {merged.Seconds:0.00}s{lodNote}\n" +
                     $"Scene now: {scene.Files.Count(f => f.FromMlo)} light props, {scene.Lights.Count} lights";
                 if (wasEmpty) FrameMlo(merged, combined, interior: false);
             }

@@ -12,6 +12,7 @@ namespace RageLightEditor.Editor
         public sealed class Entry
         {
             public string Path = "";
+            public bool Enabled = true;
             public string Name => string.IsNullOrEmpty(Path) ? "(unnamed)" : System.IO.Path.GetFileName(Path);
             public MloImportResult Result;
             public RenderModel Model;
@@ -35,7 +36,7 @@ namespace RageLightEditor.Editor
         {
             var e = entries.FirstOrDefault(x => string.Equals(x.Path, path, StringComparison.OrdinalIgnoreCase));
             if (e == null) { e = new Entry { Path = path ?? "" }; entries.Add(e); }
-            e.Result = result; e.Model = model;
+            e.Result = result; e.Model = model; e.Enabled = true;
             e.Props.Clear();
             if (props != null) foreach (var p in props) if (p != null && !e.Props.Contains(p)) e.Props.Add(p);
             Version++;

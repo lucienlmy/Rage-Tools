@@ -40,7 +40,7 @@ namespace RageLightEditor
                 var l = scene.Lights[i];
                 if (l == null || !scene.TypeShown_U35(l.Type)) continue;
                 var f = scene.OwnerFile(l);
-                if (f != null && !f.Visible) continue;
+                if (f != null && (!f.Visible || f.HiddenPlacements_U42.Contains(0))) continue;
                 var p = scene.GetInstance(l).WorldPosition;
                 var c = Vector4.Transform(new Vector4(p, 1f), vp);
                 if (c.W <= 1e-4f) continue;

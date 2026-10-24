@@ -118,6 +118,7 @@ namespace RageLightEditor
                     pendingRemoveImport_R1 = f[0];
                 }
             }
+            ServiceImportEnable_U42();
             var req = panel?.RequestRemoveImportedYtyp_R1;
             if (!string.IsNullOrEmpty(req)) { pendingRemoveImport_R1 = req; panel.RequestRemoveImportedYtyp_R1 = null; }
             var cui = Creator;

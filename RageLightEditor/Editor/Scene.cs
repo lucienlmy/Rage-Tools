@@ -43,6 +43,7 @@ namespace RageLightEditor.Editor
         public bool HasPlacement;
 
         public readonly List<Matrix> ExtraPlacements = new List<Matrix>();
+        public readonly HashSet<int> HiddenPlacements_U42 = new HashSet<int>();
 
         public string Label => InstanceCount > 1 ? $"{Name} (x{InstanceCount})" : Name;
     }
@@ -677,6 +678,7 @@ namespace RageLightEditor.Editor
                 int copies = 1 + (owner?.ExtraPlacements.Count ?? 0);
                 for (int c = 0; c < copies; c++)
                 {
+                    if (owner != null && owner.HiddenPlacements_U42.Contains(c)) continue;
                     var placement = c == 0
                         ? ((owner != null && owner.HasPlacement) ? owner.Placement : (Matrix?)null)
                         : owner.ExtraPlacements[c - 1];

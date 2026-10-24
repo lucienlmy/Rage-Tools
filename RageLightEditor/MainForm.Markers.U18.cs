@@ -41,7 +41,7 @@ namespace RageLightEditor
             {
                 var l = scene.Lights[i];
                 var ownerFile = scene.OwnerFile(l);
-                if (ownerFile != null && !ownerFile.Visible) continue;
+                if (ownerFile != null && (!ownerFile.Visible || ownerFile.HiddenPlacements_U42.Contains(0))) continue;
                 bool sel = scene.IsSelected(i);
                 if (!sel && !scene.TypeShown_U35(l.Type)) continue;
                 var inst = scene.GetInstance(l);

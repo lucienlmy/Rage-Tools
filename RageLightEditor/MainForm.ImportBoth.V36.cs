@@ -38,12 +38,18 @@ namespace RageLightEditor
             }
 
             if (ytyps.Length > 0) ImportYtyp(ytyps);
-            if (ymaps.Length > 0) ImportYmap(ymaps);
+            string skipLine = null;
+            if (ymaps.Length > 0)
+            {
+                ImportYmap(ymaps);
+                skipLine = (panel.MloStatus ?? "").Split('\n').FirstOrDefault(s => s.StartsWith("Skipped ") || s.StartsWith("None of the "));
+            }
 
             panel.MloStatus =
                 $"Imported {ytyps.Length} .ytyp and {ymaps.Length} .ymap" +
                 (ytyps.Length > 0 && ymaps.Length > 0 ? " - archetypes first, then the placements." : ".") +
-                (other > 0 ? $" {other} other file(s) were ignored." : "");
+                (other > 0 ? $" {other} other file(s) were ignored." : "") +
+                (skipLine != null ? "\n" + skipLine : "");
             Console.WriteLine($"IMPORTBOTH {ytyps.Length} ytyp(s) then {ymaps.Length} ymap(s), {other} ignored");
         }
 
