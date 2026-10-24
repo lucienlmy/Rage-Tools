@@ -20,6 +20,7 @@ namespace RageLightEditor
             MultiEditTest_U43(check);
             ShadowRoomsTest_U44(check);
             AutoShadowsTest_U45(check);
+            DynamicShadowsTest_U46(check);
         }
 
         private void CinematicEverywhereTest_U31(Action<string, bool, string> check)

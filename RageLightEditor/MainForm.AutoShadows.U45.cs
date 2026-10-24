@@ -23,11 +23,11 @@ namespace RageLightEditor
 
         internal static (int on, int off, int overBudget) AutoSpotShadows_U45(Scene sc)
         {
-            var copies = new List<(int light, RoomLights_U44 room)>();
+            var copies = new List<(int light, int copy, RoomLights_U44 room)>();
             CountRoomLights_U44(sc, copies);
             var roomsOf = new Dictionary<int, List<RoomLights_U44>>();
             var used = new Dictionary<RoomLights_U44, int>();
-            foreach (var (li, room) in copies)
+            foreach (var (li, _, room) in copies)
             {
                 if (!roomsOf.TryGetValue(li, out var rl)) roomsOf[li] = rl = new List<RoomLights_U44>();
                 rl.Add(room);
@@ -75,10 +75,10 @@ namespace RageLightEditor
         private void ServiceAutoShadows_U45()
         {
             if (panel != null && screenshotPath != null && !autoShadowProbeDone_U45 && panel.ShadowRooms_U44.Count > 0 &&
-                Environment.GetEnvironmentVariable("RLE_AUTOSHADOWPROBE") == "1")
+                Environment.GetEnvironmentVariable("RLE_AUTOSHADOWPROBE") is string probe && (probe == "1" || probe == "dyn"))
             {
                 autoShadowProbeDone_U45 = true;
-                panel.RequestAutoShadows_U45 = true;
+                if (probe == "1") panel.RequestAutoShadows_U45 = true; else panel.RequestDynamicShadows_U46 = true;
                 shadowRoomsLogged_U44 = false;
             }
             if (panel == null || !panel.RequestAutoShadows_U45) return;

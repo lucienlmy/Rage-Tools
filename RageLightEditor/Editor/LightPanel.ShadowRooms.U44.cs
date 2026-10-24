@@ -30,6 +30,7 @@ namespace RageLightEditor.Editor
         private static readonly Vector4 OkCol_U44 = new Vector4(0.45f, 0.85f, 0.55f, 1f);
 
         public bool RequestAutoShadows_U45;
+        public bool RequestDynamicShadows_U46;
         public string AutoShadowsStatus_U45;
 
         private void DrawAutoShadows_U45()
@@ -42,6 +43,14 @@ namespace RageLightEditor.Editor
                 ImGui.SetTooltip("Turns shadows on for the spot lights that need them and off for the rest.\n" +
                                  "Needs shadows: reaches at least 2 m and isn't dim. The strongest go first, and a room never goes over " + RoomLights_U44.Limit + " shadow lights.\n" +
                                  "Point and capsule lights are not touched. One Undo puts everything back.");
+            int shadowed = scene.Lights.Count(l => l != null && RoomLights_U44.CastsShadow(l));
+            if (shadowed == 0) ImGui.BeginDisabled();
+            if (ImGui.Button($"Smart dynamic shadows ({shadowed})##u46dyn", new Vector2(-1, 0))) RequestDynamicShadows_U46 = true;
+            if (shadowed == 0) ImGui.EndDisabled();
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                ImGui.SetTooltip("Stops peds and moving objects casting a pile of shadows.\n" +
+                                 "In each area only the strongest light keeps dynamic shadows; the lights around it in the same room\n" +
+                                 "keep static shadows (walls and furniture) only. Works on every shadow light. One Undo puts everything back.");
             if (!string.IsNullOrEmpty(AutoShadowsStatus_U45)) ImGui.TextWrapped(AutoShadowsStatus_U45);
         }
 

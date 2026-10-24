@@ -5730,9 +5730,7 @@ namespace RageLightEditor
             {
                 bool ctrl = (ModifierKeys & Keys.Control) != 0;
                 bool shift = (ModifierKeys & Keys.Shift) != 0;
-                if (ctrl) scene.ToggleSelect(best);
-                else if (shift) { if (!scene.IsSelected(best)) scene.SelectedIndices.Add(best); }
-                else scene.SelectedIndex = best;
+                ApplyLightPick_U46(scene, best, ctrl, shift);
 
                 var owner = scene.OwnerFile(scene.Lights[best]);
                 if (owner != null && !ctrl && !shift)
@@ -7257,6 +7255,7 @@ namespace RageLightEditor
             {
                 var tP0 = clock.Elapsed.TotalSeconds;
                 ServiceAutoShadows_U45();
+                ServiceDynamicShadows_U46();
                 UpdateShadowRooms_U44();
                 panel.Draw(deviceResources.Width, deviceResources.Height);
                 DrawViewportWidgets_U28();

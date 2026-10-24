@@ -87,7 +87,7 @@ namespace RageLightEditor.Editor
                 ImGui.SetNextItemWidth(-90);
                 UiSlider_U28.Float("Brush size##lt_brushr", ref BrushRadius_U37, 10f, 200f, "%.0f px");
             }
-            ImGui.TextDisabled("Ctrl + right-click a light adds or removes just that one.");
+            ImGui.TextDisabled("Ctrl or Shift + right-click a light adds it, or takes it out if it is already selected.");
 
             ImGui.Spacing();
             ImGui.TextDisabled("MARKERS");

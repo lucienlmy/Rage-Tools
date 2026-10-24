@@ -18,7 +18,7 @@ namespace RageLightEditor
 
         internal static List<RoomLights_U44> CountRoomLights_U44(Scene scene) => CountRoomLights_U44(scene, null);
 
-        internal static List<RoomLights_U44> CountRoomLights_U44(Scene scene, List<(int light, RoomLights_U44 room)> copiesOut)
+        internal static List<RoomLights_U44> CountRoomLights_U44(Scene scene, List<(int light, int copy, RoomLights_U44 room)> copiesOut)
         {
             var list = new List<RoomLights_U44>();
             var interiors = scene?.MloInfo?.Interiors;
@@ -79,7 +79,7 @@ namespace RageLightEditor
                     }
                     e.Lights++;
                     if (RoomLights_U44.CastsShadow(l)) e.Shadow++;
-                    copiesOut?.Add((i, e));
+                    copiesOut?.Add((i, c, e));
                 }
             }
             return list;
