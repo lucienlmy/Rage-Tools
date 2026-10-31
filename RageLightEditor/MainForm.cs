@@ -7257,6 +7257,7 @@ namespace RageLightEditor
             {
                 var tP0 = clock.Elapsed.TotalSeconds;
                 ServiceAutoShadows_U45();
+                ServiceGameMlos_U49();
                 ServiceDynamicShadows_U46();
                 UpdateShadowRooms_U44();
                 panel.Draw(deviceResources.Width, deviceResources.Height);

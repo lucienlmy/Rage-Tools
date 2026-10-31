@@ -91,7 +91,7 @@ namespace RageLightEditor.Editor
         public readonly List<MloEntityInfo> Entities = new List<MloEntityInfo>();
     }
 
-    public class MloImporter
+    public partial class MloImporter
     {
         private readonly GameFileManager game;
         private readonly ModelRenderer modelRenderer;

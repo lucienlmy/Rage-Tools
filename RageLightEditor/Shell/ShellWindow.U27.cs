@@ -522,6 +522,7 @@ namespace RageLightEditor.Shell
             Item("New light prop...", () => P.ShellCommand_U27("newlightprop")),
             Item("Load YTD...", () => P.ShellCommand_U27("loadytd")),
             Item("Import MLO (.ytyp)...", () => P.ShellCommand_U27("importmlo")),
+            Item("Import a GTA V interior...", () => P.ShellCommand_U27("gamemlo")),
             new Separator(),
             Item("Save", () => P.ShellCommand_U27("save"), () => P.ShellCanSave_U27, null, "Ctrl+S",
                 () => P.ShellMultiSave_U27 ? "Save all" : "Save"),

@@ -28,6 +28,7 @@ namespace RageLightEditor.Editor
                 case "newlightprop": RequestNewLightProxy?.Invoke(); break;
                 case "loadytd": RequestOpenYtd?.Invoke(); break;
                 case "importmlo": RequestImportYtyp?.Invoke(); break;
+                case "gamemlo": ShowGameMlos_U49 = true; break;
                 case "save": if (scene.HasModel) RequestSave?.Invoke(); break;
                 case "saveas": if (scene.HasModel) RequestSaveAs?.Invoke(null); break;
                 case "registertypes": RequestRegisterFileTypes?.Invoke(true); break;

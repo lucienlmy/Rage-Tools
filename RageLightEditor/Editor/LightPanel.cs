@@ -328,6 +328,7 @@ namespace RageLightEditor.Editor
 
             DrawTopBar();
             DrawBrushCursor_U37();
+            DrawGameMloWindow_U49();
             if (ShellChrome_U27) DrawShellPopups_U27();
             DrawDockSpace_V30(displayWidth, displayHeight);
             if (WorldMode) DrawWorldToolbar(displayWidth);
@@ -1163,6 +1164,8 @@ namespace RageLightEditor.Editor
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Load a texture dictionary");
             SameLineIfFits("Import MLO...");
             if (ImGui.SmallButton("Import MLO...")) RequestImportYtyp?.Invoke();
+            SameLineIfFits("GTA V interiors...");
+            GameMloButton_U49(true);
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Load an interior .ytyp: every entity is placed at its exact position.\nCustom props are read from the folder the .ytyp lives in;\nbase-game props come from your GTA V install.");
 
             bool canSave = scene.HasModel;
@@ -3451,6 +3454,7 @@ namespace RageLightEditor.Editor
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Load an interior .ytyp: every entity is placed at its exact position.\nCustom props are read from the folder the .ytyp lives in;\nbase-game props come from your GTA V install.");
             ImGui.SameLine();
             if (ImGui.Button("Import YMAP...")) RequestImportYmap?.Invoke();
+            GameMloButton_U49(false);
             if (ImGui.IsItemHovered()) ImGui.SetTooltip("Load a .ymap: every map instance is placed at its world position.\nSame prop resolution as the MLO import, and props with lights\nbecome editable entries too.");
             if (scene.MloModel != null)
             {
@@ -4528,6 +4532,7 @@ namespace RageLightEditor.Editor
                                      "carries nothing but lights, plus its archetype.");
                 if (ImGui.MenuItem("Load YTD...")) RequestOpenYtd?.Invoke();
                 if (ImGui.MenuItem("Import MLO (.ytyp)...")) RequestImportYtyp?.Invoke();
+                if (ImGui.MenuItem("Import a GTA V interior...")) ShowGameMlos_U49 = true;
                 if (ImGui.IsItemHovered()) ImGui.SetTooltip("Load an interior .ytyp: every entity is placed at its exact position.\nCustom props are read from the folder the .ytyp lives in;\nbase-game props come from your GTA V install.");
                 ImGui.Separator();
                 bool canSave = scene.HasModel;
