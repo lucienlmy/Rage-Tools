@@ -17,7 +17,7 @@ namespace RageLightEditor
             float radius = Math.Max(v.Falloff * v.SizeScale, 0.05f);
             float outerA = MathUtil.Clamp(v.OuterAngleRad, 0.001f, 1.55f);
             float innerA = MathUtil.Clamp(v.InnerAngleRad, 0.0f, outerA);
-            float scale = v.Intensity * v.LightIntensity;
+            float scale = VolumeScale_U50(v.Intensity, v.LightIntensity, radius, outerA, v.Type);
             var inner = v.Colour * scale;
             var outer = v.HasOuter ? v.OuterColour * v.OuterIntensity * scale : inner;
             volumeRenderer_U25.Add(v.Pos, v.Dir, radius, (float)Math.Cos(outerA), (float)Math.Cos(innerA),

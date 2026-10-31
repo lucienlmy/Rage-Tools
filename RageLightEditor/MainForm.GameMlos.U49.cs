@@ -48,7 +48,6 @@ namespace RageLightEditor
             if (!string.IsNullOrEmpty(want) && screenshotPath != null && !gameMloProbeDone_U49 && GameMloList_U49() is List<GameMloInfo_U49> list)
             {
                 gameMloProbeDone_U49 = true;
-                panel.ShowGameMlos_U49 = true;
                 panel.RequestImportGameMlo_U49 = list.FirstOrDefault(m => string.Equals(m.Name, want, StringComparison.OrdinalIgnoreCase));
                 if (panel.RequestImportGameMlo_U49 == null) Console.WriteLine($"GAMEMLO {want} is not in the list");
             }
@@ -99,6 +98,12 @@ namespace RageLightEditor
                                   $"Scene now: {scene.Files.Count(f => f.FromMlo)} light props, {scene.Lights.Count} lights" +
                                   (r.Missing > 0 ? $"\n{r.Missing} not found: {string.Join(", ", r.MissingNames.Take(4))}" : "");
                 Console.WriteLine($"GAMEMLO imported {pick.Name} ({pick.Ytyp}): placed {r.Placed}/{r.EntityCount}, missing {r.Missing}, light props {r.Props.Count}, lights {scene.Lights.Count}, rooms {r.Interiors.FirstOrDefault()?.Arch?.rooms?.Length ?? 0}, meshes {model.Meshes.Count}");
+                if (screenshotPath != null)
+                    foreach (var l in scene.Lights.Where(l => (l.Flags & LightDefs.FlagDrawVolume) != 0 && l.VolumeIntensity > 0).Take(12))
+                    {
+                        var w = scene.GetInstance(l).WorldPosition;
+                        Console.WriteLine($"GAMEMLO volume light {scene.OwnerFile(l)?.Name} type {l.Type} at {w.X:0.00},{w.Y:0.00},{w.Z:0.00} intensity {l.Intensity:0.##} volume {l.VolumeIntensity:0.##} size {l.VolumeSizeScale:0.##} falloff {l.Falloff:0.##} cone {l.ConeOuterAngle:0.#} colour {l.ColorR},{l.ColorG},{l.ColorB}");
+                    }
                 if (wasEmpty) FrameMlo(r, model);
             }
             catch (Exception ex)
