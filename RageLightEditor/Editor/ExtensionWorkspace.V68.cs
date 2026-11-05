@@ -151,7 +151,11 @@ namespace RageLightEditor.Editor
         {
             if (!(a is MloArchetype mlo)) return 0;
             int n = 0;
-            foreach (var e in mlo.entities ?? Array.Empty<MCEntityDef>())
+            var all = (mlo.entities ?? Array.Empty<MCEntityDef>()).AsEnumerable();
+            if (mlo.entitySets != null)
+                foreach (var set in mlo.entitySets)
+                    if (set?.Entities != null) all = all.Concat(set.Entities);
+            foreach (var e in all)
             {
                 if (e == null) continue;
                 var h = e._Data.archetypeName;

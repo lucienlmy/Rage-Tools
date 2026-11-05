@@ -86,6 +86,7 @@ namespace RageLightEditor.Editor
 
             ImGui.Spacing();
             ImGui.TextColored(ExtWorkspaceColour, "OR TAKE WHAT IS OPEN");
+            DrawExtPicker_U52();
             bool haveWorldSel = !string.IsNullOrEmpty(ExtWorldSelName_V68);
             if (!haveWorldSel) ImGui.BeginDisabled();
             if (ImGui.Button(haveWorldSel ? "World pick: " + ExtWorldSelName_V68
@@ -145,6 +146,7 @@ namespace RageLightEditor.Editor
                         int i = Ext.Props.IndexOf(pr);
                         if (ImGui.Selectable(pr.Name + "##pr" + i, Ext.SelectedProp == i))
                             RequestExtPickProp_V69 = i;
+                        if (ExtScrollToPick_U52 && Ext.SelectedProp == i) ImGui.SetScrollHereY(0.5f);
                         if (ImGui.IsItemHovered())
                             ImGui.SetTooltip(pr.Name + "\n" + pr.From + "\n" +
                                              $"at {pr.Position.X:0.##}, {pr.Position.Y:0.##}, {pr.Position.Z:0.##}\n" +
@@ -177,6 +179,12 @@ namespace RageLightEditor.Editor
                         Ext.CancelSnap();
                         RequestExtFrame_V68 = true;
                     }
+                    if (ExtScrollToPick_U52 && Ext.Selected == i) ImGui.SetScrollHereY(0.5f);
+                    if (t.Archetype is MloArchetype)
+                    {
+                        ImGui.SameLine();
+                        ImGui.TextDisabled("interior");
+                    }
                     if (n > 0)
                     {
                         ImGui.SameLine();
@@ -194,6 +202,7 @@ namespace RageLightEditor.Editor
                         : "Nothing matches that.");
             }
             ImGui.EndChild();
+            ExtScrollToPick_U52 = false;
 
             if (ImGui.Checkbox("Show its model", ref ExtAutoModel_V68)) ExtShownFor_V68 = -1;
             if (ImGui.IsItemHovered())
@@ -311,7 +320,10 @@ namespace RageLightEditor.Editor
                 Ext.ArmCornerChain(extIndex, sel);
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Then click the model's vertices one after another -\n" +
-                                 ArchetypeExtensions_V62.Spaced(corners[0].Prop.Name) + " first.");
+                                 ArchetypeExtensions_V62.Spaced(corners[0].Prop.Name) + " first." +
+                                 (sel is MCExtensionDefLightShaft
+                                     ? "\nFrom inside the room, go round clockwise. If you go the other way\nthe corners are turned round for you when the last one lands."
+                                     : ""));
         }
 
         private bool DrawSnapFieldButton_V68(ArchetypeExtensions_V62.Field f, int extIndex)

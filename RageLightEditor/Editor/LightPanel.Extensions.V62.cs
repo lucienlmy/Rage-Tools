@@ -155,6 +155,7 @@ namespace RageLightEditor.Editor
             DrawSnapControls_V68(sel, extSel_V62);
             DrawGizmoPointPicker_V69(sel);
             DrawShaftPresets_V69(sel);
+            DrawShaftCorners_U52(sel);
             ImGui.Spacing();
 
             foreach (var f in ArchetypeExtensions_V62.Fields(sel))

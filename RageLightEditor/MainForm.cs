@@ -6379,6 +6379,8 @@ namespace RageLightEditor
             foreach (var f in scene.SelectedFiles) Mark(f, 1);
         }
 
+        partial void ExtHighlights_U52();
+
         private readonly HashSet<LoadedFile> highlighted = new HashSet<LoadedFile>();
 
         private void FrameProp(LoadedFile f)
@@ -7547,6 +7549,7 @@ namespace RageLightEditor
             }
 
             UpdatePropHighlights();
+            ExtHighlights_U52();
             panel.TwoSidedMeshCount = sceneRenderer.TwoSidedMeshes;
             panel.TotalMeshCount = sceneRenderer.DrawnMeshes;
             ApplyMaterialDebug();

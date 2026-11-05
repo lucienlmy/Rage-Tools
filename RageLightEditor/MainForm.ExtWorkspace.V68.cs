@@ -463,7 +463,7 @@ namespace RageLightEditor
             if (panel.RequestExtFrame_V68)
             {
                 panel.RequestExtFrame_V68 = false;
-                if (scene.HasModel) FrameModel();
+                if (!ExtFramePicked_U52() && scene.HasModel) FrameModel();
             }
 
             if (extProbeFrames_V68 > 0 && gameFiles != null && gameFiles.Ready &&
@@ -474,6 +474,7 @@ namespace RageLightEditor
             if (!extYptScanDone_V73 && Environment.GetEnvironmentVariable("RLE_YPTSCAN") == "1" &&
                 gameFiles != null && gameFiles.Ready)
             { extYptScanDone_V73 = true; ExtYptScan_V73(); }
+            ExtShaftWindScan_U52();
             if (extProbeFrames_V68 == 0)
             {
                 extProbeFrames_V68 = -1;
@@ -527,8 +528,16 @@ namespace RageLightEditor
 
         private void ExtShowModelFor_V68(ExtensionTarget_V68 t)
         {
+            if (ExtFocusInScene_U52(t)) return;
+            extPicked_U52 = default;
             var name = t?.Archetype?.Name;
             if (string.IsNullOrWhiteSpace(name)) return;
+            if (t.Archetype is MloArchetype)
+            {
+                panel.Ext.Say($"{name} is an interior - open it on the Lights or MLO page to see it here. " +
+                              "Its extensions sit from the interior's origin.");
+                return;
+            }
             var already = scene.Files.FirstOrDefault(f => f?.Path != null &&
                 string.Equals(Path.GetFileNameWithoutExtension(f.Path), name, StringComparison.OrdinalIgnoreCase));
             if (already != null) return;
@@ -649,6 +658,7 @@ namespace RageLightEditor
         {
             if (!ExtActive_V68 || consumed) return;
             var ws = panel.Ext;
+            if (panel.ExtPicking_U52) { ExtPickClick_U52(x, y); consumed = true; return; }
             if (!ws.SnapArmed) return;
             var arch = ws.CurrentArchetype;
             if (arch == null) { ws.CancelSnap(); return; }
@@ -665,7 +675,10 @@ namespace RageLightEditor
             ws.PushUndo_V70("Snap " + ArchetypeExtensions_V62.Spaced(ws.SnapFieldName ?? "point"));
             var inv = t?.Orientation ?? Quaternion.Identity; inv.Conjugate();
             var local = Vector3.Transform(hit.Position - (t?.Placement ?? Vector3.Zero), inv);
+            int snapExt = ws.SnapExtension;
+            string snapField = ws.SnapFieldName;
             ws.ApplySnap(arch, local);
+            ExtAfterCornerSnap_U52(arch, snapExt, snapField, Vector3.Transform(camera.Position - (t?.Placement ?? Vector3.Zero), inv));
             ExtNoteEdited_V68();
             consumed = true;
         }
@@ -694,6 +707,7 @@ namespace RageLightEditor
         {
             if (!ExtActive_V68 || handled) return;
             var ws = panel.Ext;
+            if (panel.ExtPicking_U52) { panel.ExtPicking_U52 = false; ws.Say("picking stopped"); handled = true; return; }
             var t = ws.Current;
             if (t?.Archetype == null) return;
 
@@ -719,6 +733,7 @@ namespace RageLightEditor
         partial void ExtEscape_V68(ref bool handled)
         {
             if (!ExtActive_V68 || handled) return;
+            if (panel.ExtPicking_U52) { panel.ExtPicking_U52 = false; panel.Ext.Say("picking stopped"); handled = true; return; }
             if (!panel.Ext.SnapArmed) return;
             panel.Ext.CancelSnap();
             panel.Ext.Say("snapping cancelled");
@@ -735,6 +750,7 @@ namespace RageLightEditor
         {
             if (!ExtActive_V68) return;
             var ws = panel.Ext;
+            ExtHoverPick_U52();
             var t = ws.Current;
             if (t?.Archetype == null) return;
 
@@ -795,7 +811,11 @@ namespace RageLightEditor
                 triRenderer.AddThickCircleAA(world, right, up, rad + 2.0f * wpp, camera.Position,
                                              0.7f * wpp, 1.2f * wpp, armed ? hot : col, 24);
                 any = true;
-                if (n.StartsWith("corner", StringComparison.OrdinalIgnoreCase)) corners.Add(world);
+                if (n.StartsWith("corner", StringComparison.OrdinalIgnoreCase))
+                {
+                    corners.Add(world);
+                    DrawWorldLabel(world + up * (10.0f * wpp), n.Substring(6).ToUpperInvariant(), armed ? hot : col);
+                }
                 else if (n == "bottom") bottom = world;
                 else if (n == "top") top = world;
             }

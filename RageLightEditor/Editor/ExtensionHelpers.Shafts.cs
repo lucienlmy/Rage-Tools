@@ -10,8 +10,8 @@ namespace RageLightEditor.Editor
     {
         public const uint ShaftFlagUseSunDirection = 1u << 0;
         public const uint ShaftFlagUseSunColour = 1u << 1;
-        public const uint ShaftFlagScaleBySunIntensity = 1u << 2;
-        public const uint ShaftFlagScaleBySunColour = 1u << 3;
+        public const uint ShaftFlagScaleBySunIntensity = 1u << 5;
+        public const uint ShaftFlagScaleBySunColour = 1u << 4;
         public static readonly bool ShaftDebug = Environment.GetEnvironmentVariable("RLE_SHAFTDBG") == "1";
         public static int ShaftDebugLeft;
         private static void Dbg(string s) { if (ShaftDebug && ShaftDebugLeft-- > 0) Console.WriteLine("SHAFTDBG " + s); }
@@ -76,6 +76,11 @@ namespace RageLightEditor.Editor
                 var blended = Vector3.Lerp(wdir, sun.Travel, amount);
                 if (blended.LengthSquared() > 1e-6f) wdir = Vector3.Normalize(blended);
             }
+            if (!ShaftWinding_U52.DrawnFor(a0, b0, c0, d0, wdir, camPos, flags))
+            {
+                Dbg("not drawn: its corners face away from the beam or from the camera");
+                return false;
+            }
             float len = ShaftReach_S5(Math.Max(ls.length, 0.05f), inward, wdir, sunDir);
             float pane = ShaftFlux_P3(wdir, inward, Vector3.Cross(X, Y), sunDir);
             var tip = centre + wdir * len;
@@ -84,8 +89,7 @@ namespace RageLightEditor.Editor
 
             float r = ((ls.color >> 16) & 255) / 255.0f, g = ((ls.color >> 8) & 255) / 255.0f, b = (ls.color & 255) / 255.0f;
             var col = new Vector3(r, g, b);
-            if (sunColour) col = sun.Colour;
-            else if (sunTint) col *= sun.Colour;
+            if (sunColour) col = sunTint ? col * sun.Colour : sun.Colour;
             float sunAmount = sunScale ? sun.Brightness : ShaftReferenceSun;
             if (sunDir && !sunScale) sunAmount *= MathUtil.SmoothStep(MathUtil.Clamp(sun.Elevation / 0.12f, 0.0f, 1.0f));
             if (sunAmount <= 0.001f) return false;
