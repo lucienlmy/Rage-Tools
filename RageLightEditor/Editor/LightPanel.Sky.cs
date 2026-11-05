@@ -66,11 +66,11 @@ namespace RageLightEditor.Editor
             int tm = ToneMapCodeWalker ? 0 : 1;
             OptWidth();
             if (ImGui.Combo("Tone map", ref tm, "RAGE\0Filmic\0")) ToneMapCodeWalker = tm == 0;
-            Tip("RAGE: average-luminance auto exposure, Reinhard with a white point, 0.6 x bloom.\n" +
+            Tip("RAGE: the game's own exposure curve, Reinhard with a white point, 0.6 x bloom.\n" +
                 "Filmic: the timecycle's own filmic curve and colour correction at a fixed exposure.");
             if (ToneMapCodeWalker)
             {
-                OptCheck("Auto exposure", ref AutoExposure, "Adapt the exposure to the frame's average brightness, as the game does.\nOff: the Exposure slider alone.");
+                OptCheck("Auto exposure", ref AutoExposure, "Adapt the exposure gently to what's on screen, using the game's curve, so a surface keeps\nnearly the same brightness near or far.\nOff: the Exposure slider alone.");
                 OptSlider("Bloom", ref RageBloom, 0.0f, 2.0f, "%.2f", "Scale on the glow around bright things. 0 = off, 1 = the reference look.", def: 1.0f);
             }
             float defW = ImGui.CalcTextSize("Default").X + ImGui.GetStyle().FramePadding.X * 2.0f;

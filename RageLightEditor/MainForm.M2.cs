@@ -76,7 +76,7 @@ namespace RageLightEditor
         private void ApplyGameExposure_M2(TimecycleData.PostFxState pf, bool haveCycle)
         {
             m2LastPostFx = pf; m2HaveCycle = haveCycle;
-            bool on = gameExposureMode == 1 || (gameExposureMode < 0 && panel != null && panel.WorldMode);
+            bool on = gameExposureMode == 1 || (gameExposureMode < 0 && panel != null && (panel.WorldMode || panel.RenderMode != 7));
             if (!on) { postFx.Vars.ExposureGame = Vector4.Zero; return; }
             if (!haveCycle) { postFx.Vars.ExposureGame = new Vector4(1.0f, 0.0f, -3.5f, 3.0f); return; }
             postFx.Vars.ExposureGame = new Vector4(1.0f, pf.ExposureTweakStops, pf.ExposureMinStops, pf.ExposureMaxStops);

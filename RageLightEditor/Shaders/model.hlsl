@@ -679,10 +679,19 @@ float3 ComputeLight(Light l, int lightIdx, float3 worldPos, float3 camRel, float
             if (z > 0.001)
             {
                 float s = 1.0 / max(tan(oang), 0.01);
-                float2 uv = float2(dot(toSurf, l.TangentX), dot(toSurf, l.TangentY)) / z * s * 0.5 + 0.5;
-                lcol *= SampleProjTex(pti, saturate(uv));
+                float2 uv = float2(dot(toSurf, l.TangentY), -dot(toSurf, l.TangentX)) / z * s * 0.5 + 0.5;
+                float3 cookie = SampleProjTex(pti, saturate(uv));
+                lcol *= cookie * cookie;
             }
         }
+    }
+    else if (l.Type == 1 && (int)l.ProjTexIndex >= 0)
+    {
+        float3 toSurf = -ldir;
+        float below = 1.0 - dot(-l.Direction, toSurf);
+        float2 uv = float2(-dot(toSurf, l.TangentY), dot(toSurf, l.TangentX)) / max(below, 1e-4) * 0.5 + 0.5;
+        float3 cookie = SampleProjTex((int)l.ProjTexIndex, saturate(uv));
+        lcol *= cookie * cookie;
     }
 
     if (l.ShadowSlot >= 0)

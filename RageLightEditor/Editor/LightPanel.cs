@@ -329,6 +329,7 @@ namespace RageLightEditor.Editor
             DrawTopBar();
             DrawBrushCursor_U37();
             DrawGameMloWindow_U49();
+            DrawProjComboProbe_U51();
             if (ShellChrome_U27) DrawShellPopups_U27();
             DrawDockSpace_V30(displayWidth, displayHeight);
             if (WorldMode) DrawWorldToolbar(displayWidth);
@@ -657,9 +658,10 @@ namespace RageLightEditor.Editor
                   "modifier's overrides, all live, with Save as XML for both.");
 
                 H("7. Projected texture (IES / gobo)");
-                T("Spot lights can project a texture - this is how GTA does IES-style patterns. In Attachment & IDs, " +
-                  "pick a texture from the loaded dictionaries (or enter its hash); the projection flag is set " +
-                  "automatically and the pattern shows live on lit surfaces. Load the .ytd containing the texture first.");
+                T("Spot and point lights can project a texture - this is how GTA does IES-style patterns. In Attachment & IDs, " +
+                  "open Projected texture and type the name: the list narrows as you type, and Enter uses what you typed, " +
+                  "even a texture that is only in the game files. In game the texture must be in the prop's own " +
+                  "texture dictionary (its .ytd or a parent of it).");
 
                 H("8. Culling plane");
                 T("Enable flag 18 to clip a light with a plane: the orange grid shows the plane, the green arrow " +
@@ -5778,38 +5780,7 @@ namespace RageLightEditor.Editor
 
                 uint pth = l.ProjectedTextureHash.Hash;
                 var texNames = scene.GetTextureNames();
-                string current = "(none)";
-                if (pth != 0)
-                {
-                    current = $"hash {pth:X8}";
-                    foreach (var n in texNames)
-                    {
-                        if (JenkHash.GenHash(n.ToLowerInvariant()) == pth) { current = n; break; }
-                    }
-                }
-                if (ImGui.BeginCombo("Projected texture", current))
-                {
-                    if (ImGui.Selectable("(none)", pth == 0))
-                    {
-                        scene.PushUndo();
-                        l.ProjectedTextureHash = new MetaHash(0);
-                        l.Flags &= ~LightDefs.FlagTextureProjection;
-                        scene.Dirty = true;
-                    }
-                    foreach (var n in texNames)
-                    {
-                        uint h = JenkHash.GenHash(n.ToLowerInvariant());
-                        if (ImGui.Selectable(n, h == pth))
-                        {
-                            scene.PushUndo();
-                            l.ProjectedTextureHash = new MetaHash(h);
-                            l.Flags |= LightDefs.FlagTextureProjection;
-                            scene.Dirty = true;
-                        }
-                    }
-                    ImGui.EndCombo();
-                }
-                if (ImGui.IsItemHovered()) ImGui.SetTooltip("Gobo/IES pattern projected by spot lights (sets flag 5).\nLoad the YTD that contains the texture to see it and to pick by name.");
+                DrawProjectedTextureCombo_U51(l, texNames);
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Import..."))
                 {
@@ -5829,6 +5800,7 @@ namespace RageLightEditor.Editor
                     }
                 }
                 if (ImGui.IsItemHovered()) ImGui.SetTooltip("JOAAT hash (hex) if the texture isn't in a loaded dictionary");
+                DrawProjectedTextureStatus_U51(l);
             }
 
             ImGui.EndTabItem();

@@ -23,6 +23,7 @@ namespace RageLightEditor
             DynamicShadowsTest_U46(check);
             SaveEditedOnlyTest_U47(check);
             VolumeScaleTest_U50(check);
+            ProjTexTest_U51(check);
         }
 
         private void CinematicEverywhereTest_U31(Action<string, bool, string> check)

@@ -7257,6 +7257,7 @@ namespace RageLightEditor
             {
                 var tP0 = clock.Elapsed.TotalSeconds;
                 ServiceAutoShadows_U45();
+                ServiceProjTexProbe_U51();
                 ServiceGameMlos_U49();
                 ServiceDynamicShadows_U46();
                 UpdateShadowRooms_U44();
@@ -7606,26 +7607,7 @@ namespace RageLightEditor
             lastProbeLightCount = lightCount;
             AfterLightsBuilt_N2(lightCount);
 
-            Array.Clear(projTexSrvs, 0, projTexSrvs.Length);
-            var projSlots = new Dictionary<uint, int>();
-            for (int i = 0; i < lightCount && i < gpuLightSources.Count; i++)
-            {
-                var l = gpuLightSources[i];
-                if (l == null) continue;
-                uint hash = l.ProjectedTextureHash.Hash;
-                if ((l.Flags & LightDefs.FlagTextureProjection) == 0 || hash == 0 || NoProjTex_U25) continue;
-                if (!projSlots.TryGetValue(hash, out int slot))
-                {
-                    if (projSlots.Count >= GpuLight.MaxProjTextures) continue;
-                    var tex = scene.FindTexture(hash);
-                    var srv = tex != null ? textureLoader.GetSRV(tex) : null;
-                    if (srv == null) continue;
-                    slot = projSlots.Count;
-                    projSlots[hash] = slot;
-                    projTexSrvs[slot] = srv;
-                }
-                gpuLights[i].ProjTexIndex = slot;
-            }
+            AssignProjectedTextures_U51(lightCount);
 
             var context = deviceResources.Context;
             GpuFrameBegin_J4(context);
