@@ -4498,6 +4498,7 @@ namespace RageLightEditor.Editor
                 if (ImGui.MenuItem("Save As...", null, false, canSave)) RequestSaveAs?.Invoke(null);
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Write the active prop (highlighted in the Props tab) to a new file.");
+                DrawAutoSaveMenuItem_U54();
                 ImGui.Separator();
                 if (ImGui.MenuItem("Open files with this editor (register file types)")) RequestRegisterFileTypes?.Invoke(true);
                 if (ImGui.IsItemHovered())

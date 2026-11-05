@@ -527,6 +527,7 @@ namespace RageLightEditor.Shell
             Item("Save", () => P.ShellCommand_U27("save"), () => P.ShellCanSave_U27, null, "Ctrl+S",
                 () => P.ShellMultiSave_U27 ? "Save all" : "Save"),
             Item("Save As...", () => P.ShellCommand_U27("saveas"), () => P.ShellCanSave_U27),
+            Item("Auto save lights every 30 s", () => P.AutoSaveLights_U54 = !P.AutoSaveLights_U54, null, () => P.AutoSaveLights_U54),
             new Separator(),
             Item("Open files with this editor (register file types)", () => P.ShellCommand_U27("registertypes")),
             Item("Remove those file associations", () => P.ShellCommand_U27("unregistertypes")));

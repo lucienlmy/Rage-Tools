@@ -7128,6 +7128,7 @@ namespace RageLightEditor
             OnTick_FurNoise_U8();
             OnWorldTick_ClipArchScan_U7();
             OnWorldTick_Ext_V68();
+            ServiceAutoSave_U54();
             ServiceParticleDiagnostics_S6();
             ServiceParticleAuthoring_T6();
 
