@@ -23,11 +23,9 @@ namespace RageLightEditor.Editor
 
                 if (keepWorldPosition)
                 {
-                    var world = GetInstance(l).WorldPosition;
-                    ownerOf[l] = target;
-                    var back = GetInstance(l);
-                    var delta = world - back.WorldPosition;
-                    l.Position += delta;
+                    var w = GetInstance(l);
+                    MakePrimaryCopy_U55(target, NearestCopy_U55(target, w.WorldPosition));
+                    PutLightAtWorld_U55(l, target, w.WorldPosition, w.WorldDirection, w.WorldTangent);
                 }
                 else ownerOf[l] = target;
 

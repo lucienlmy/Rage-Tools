@@ -1041,6 +1041,7 @@ namespace RageLightEditor.Editor
             var target = (ActiveFile != null && Files.Contains(ActiveFile))
                 ? ActiveFile : (OwnerFile(SelectedLight) ?? Files[0]);
             var spawn = NextLightSpawnPos;
+            MakePrimaryCopy_U55(target, NearestCopy_U55(target, spawn));
             if (target.HasPlacement)
             {
                 spawn = Vector3.TransformCoordinate(spawn, Matrix.Invert(target.Placement));
