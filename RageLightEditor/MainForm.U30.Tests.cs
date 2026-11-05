@@ -25,6 +25,7 @@ namespace RageLightEditor
             VolumeScaleTest_U50(check);
             ProjTexTest_U51(check);
             ExtPickerTest_U52(check);
+            TwinLightsTest_U53(check);
         }
 
         private void CinematicEverywhereTest_U31(Action<string, bool, string> check)

@@ -89,6 +89,7 @@ namespace RageLightEditor
         private void ServiceImportEnable_U42()
         {
             ToggleProbe_U42();
+            ServiceTwinLights_U53();
             var req = panel?.RequestToggleImport_U42;
             if (string.IsNullOrEmpty(req)) return;
             panel.RequestToggleImport_U42 = null;

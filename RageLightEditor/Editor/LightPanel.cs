@@ -204,9 +204,6 @@ namespace RageLightEditor.Editor
         public event Action<bool> WorkspaceChanged;
 
         private bool openDeleteConfirm;
-        private bool openCloneConfirm;
-        private Action cloneYes, cloneNo;
-        public bool CloneWasInstance;
 
         public string CaptureBindingAction { get; private set; }
 
@@ -225,13 +222,6 @@ namespace RageLightEditor.Editor
         public void AskDeleteSelected()
         {
             if (scene.SelectedIndices.Count > 0) openDeleteConfirm = true;
-        }
-
-        public void AskCloneConfirm(Action yes, Action no)
-        {
-            cloneYes = yes;
-            cloneNo = no;
-            openCloneConfirm = true;
         }
 
         public bool TryCaptureKey(System.Windows.Forms.Keys combo)
@@ -1530,11 +1520,6 @@ namespace RageLightEditor.Editor
                 ImGui.OpenPopup("Delete lights?");
                 openDeleteConfirm = false;
             }
-            if (openCloneConfirm)
-            {
-                ImGui.OpenPopup("Keep cloned light?");
-                openCloneConfirm = false;
-            }
 
             var centre = new Vector2(ImGui.GetIO().DisplaySize.X * 0.5f, ImGui.GetIO().DisplaySize.Y * 0.5f);
             ImGui.SetNextWindowPos(centre, ImGuiCond.Appearing, new Vector2(0.5f, 0.5f));
@@ -1556,36 +1541,6 @@ namespace RageLightEditor.Editor
                 }
                 else if (no)
                 {
-                    ImGui.CloseCurrentPopup();
-                }
-                ImGui.EndPopup();
-            }
-
-            ImGui.SetNextWindowPos(centre, ImGuiCond.Appearing, new Vector2(0.5f, 0.5f));
-            if (ImGui.BeginPopupModal("Keep cloned light?", ImGuiWindowFlags.AlwaysAutoResize))
-            {
-                ImGui.Text(CloneWasInstance
-                    ? "Keep this linked instance at its new position?"
-                    : "Keep the cloned light at this position?");
-                if (CloneWasInstance)
-                    ImGui.TextDisabled("Instances share every setting except their transform.");
-                ImGui.TextDisabled("Enter = yes    Backspace = cancel");
-                ImGui.Separator();
-                bool yes = ImGui.Button("Yes", new Vector2(120, 0)) ||
-                           ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter);
-                ImGui.SameLine();
-                bool no = ImGui.Button("Cancel", new Vector2(120, 0)) ||
-                          ImGui.IsKeyPressed(ImGuiKey.Backspace) || ImGui.IsKeyPressed(ImGuiKey.Escape);
-                if (yes)
-                {
-                    cloneYes?.Invoke();
-                    cloneYes = cloneNo = null;
-                    ImGui.CloseCurrentPopup();
-                }
-                else if (no)
-                {
-                    cloneNo?.Invoke();
-                    cloneYes = cloneNo = null;
                     ImGui.CloseCurrentPopup();
                 }
                 ImGui.EndPopup();

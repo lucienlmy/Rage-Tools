@@ -5365,13 +5365,7 @@ namespace RageLightEditor
                 }
                 else if (gizmo != null && gizmo.Dragging)
                 {
-                    if (gizmo.MouseUp())
-                    {
-                        panel.CloneWasInstance = gizmo.CloneWasInstance;
-                        panel.AskCloneConfirm(
-                            yes: () => { },
-                            no: () => scene.Undo());
-                    }
+                    gizmo.MouseUp();
                 }
                 else if (orbiting && mouseDownDrag < 5.0f && !ImGuiWantsMouse && !gizmoConsumedClick)
                 {
