@@ -7817,12 +7817,12 @@ namespace RageLightEditor
             }
 
             if (panel.ShowGridEffective(scene.HasModel) && !panel.WorldMode) QueueMaxGrid_U28();
-            if (!photoMode) DrawSelectedPropOutline();
+            if (!photoMode && !panel.WorldMode) DrawSelectedPropOutline();
             if (!panel.WorldMode) DrawLightGizmos();
             if (panel.WorldMode && !photoMode) DrawWorldSelectionBox();
             lineRenderer.Flush(context, camera.ViewProjMatrix);
 
-            if (panel.ShowMarkers) DrawLightMarkers();
+            if (panel.ShowMarkers && !panel.WorldMode) DrawLightMarkers();
             if (photoMode)
             {
             }
