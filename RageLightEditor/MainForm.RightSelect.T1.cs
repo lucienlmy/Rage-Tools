@@ -48,6 +48,7 @@ namespace RageLightEditor
                 return;
             }
 
+            if (OfferMoveLightsHere_U56(x, y)) return;
             PickAt(x, y);
         }
 

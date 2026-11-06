@@ -42,10 +42,6 @@ namespace RageLightEditor.Editor
             ImGui.NewLine();
             if (gizmo.Dragging && gizmo.SnapMode != 0 && !string.IsNullOrEmpty(gizmo.SnapNote))
                 ImGui.TextColored(UiTheme.Accent, gizmo.SnapNote);
-            else
-                ImGui.TextDisabled(gizmo.SnapMode == 0 ? "Snap off: lights move freely"
-                                 : gizmo.SnapMode == 1 ? "Drag a light onto a model vertex"
-                                 : "Drag a light onto the model surface");
         }
 
         private void DrawInstanceLinkButtons_U11()

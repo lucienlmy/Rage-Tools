@@ -915,9 +915,6 @@ namespace RageLightEditor.Editor
                 ImGui.SameLine();
                 DrawModeButton("Rotate (E)", GizmoMode.Rotate);
                 DrawGizmoExtras_U11();
-                ImGui.TextDisabled("WASD fly  R/C up-down  Shift fast  Ctrl slow");
-                ImGui.TextDisabled($"X/Z: speed   V: mouse-look   {AppSettings.KeyLabel(settings.GetBind("GoToOrigin"))}: go to light");
-                ImGui.TextDisabled("Shift+drag gizmo: copy   Alt+drag: instance");
             }
             ImGui.Separator();
 
@@ -1190,7 +1187,6 @@ namespace RageLightEditor.Editor
                 }
                 ImGui.EndPopup();
             }
-            if (!MaterialMode) DrawGoToRow_O3();
             ImGui.Separator();
 
             if (ImGui.BeginTabBar("scenetabs"))
@@ -1515,6 +1511,7 @@ namespace RageLightEditor.Editor
             DrawResetConfirm();
             DrawWorldResetConfirm();
             DrawNameDialogs();
+            DrawMoveHerePopup_U56();
             if (openDeleteConfirm)
             {
                 ImGui.OpenPopup("Delete lights?");
@@ -1558,6 +1555,8 @@ namespace RageLightEditor.Editor
             }
             if (ImGui.Button(label)) gizmo.Mode = mode;
             if (on) ImGui.PopStyleColor(2);
+            if (mode == GizmoMode.Translate && ImGui.IsItemHovered())
+                ImGui.SetTooltip("Shift+drag the gizmo: copy   Alt+drag: instance");
         }
 
         private void DrawRightPanel(float displayWidth, float displayHeight)
@@ -1643,6 +1642,11 @@ namespace RageLightEditor.Editor
             }
 
             if (Header("View", true)) DrawViewSection();
+            if (!MaterialMode)
+            {
+                if (GotoFocus_O3) ImGui.SetNextItemOpen(true);
+                if (Header("Go to")) DrawGoToBody_O3();
+            }
             if (Header("Cinematic" + (RenderMode == 7 ? "  (on)" : "") + "###cinematic", RenderMode == 7))
                 DrawCinematicSection();
             DrawMloCreatorSection_H5();
@@ -1792,6 +1796,16 @@ namespace RageLightEditor.Editor
         internal static readonly Vector3 ColRoom_V33 = new Vector3(1.00f, 0.66f, 0.22f);
         internal static readonly Vector3 ColPortal_V33 = new Vector3(1.00f, 0.66f, 0.22f);
         internal static readonly Vector3 ColSnap_V33 = new Vector3(0.42f, 0.88f, 0.50f);
+
+        internal static bool SmallDangerButton_U56(string label)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Button, ColDanger);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ColDangerHi);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, ColDangerHi);
+            bool r = ImGui.SmallButton(label);
+            ImGui.PopStyleColor(3);
+            return r;
+        }
 
         internal static bool DangerButton(string label, Vector2 size)
         {
@@ -4256,7 +4270,7 @@ namespace RageLightEditor.Editor
                     float rowReserve = UiFit_V32.Reserve(
                         UiFit_V32.TextW($"({lc})"),
                         UiFit_V32.SmallButtonW(f.Visible ? "hide" : "show"),
-                        UiFit_V32.SmallButtonW("Save As"));
+                        UiFit_V32.SmallButtonW("del"));
                     if (ImGui.Selectable($"{(f.Visible ? "" : "[hidden] ")}{f.Label}{(f.Dirty ? " *" : "")}##prop{shown}_{f.Path}",
                         isActive, ImGuiSelectableFlags.None, new Vector2(UiFit_V32.LeadingWidth(rowReserve), 0)))
                     {
@@ -4279,34 +4293,8 @@ namespace RageLightEditor.Editor
                             note += Scene.HasWritableResource(f)
                                 ? "\nFrom the game archives: edit it, then use Save As to write a loose .ydr."
                                 : "\nFrom the game archives, and there is nothing here that can be written out.";
-                        ImGui.SetTooltip($"{f.Path}\n{lc} light(s). Click to make active: new lights are added here." + note);
+                        ImGui.SetTooltip($"{f.Path}\n{lc} light(s). Click to make active: new lights are added here.\nRight-click: Save, Save As, Hide, Close." + note);
                     }
-                    ImGui.SameLine();
-                    ImGui.TextDisabled($"({lc})");
-                    ImGui.SameLine();
-                    if (ImGui.SmallButton($"{(f.Visible ? "hide" : "show")}##vis{shown}_{f.Path}"))
-                    {
-                        f.Visible = !f.Visible;
-                    }
-                    ImGui.SameLine();
-                    bool canWrite = Scene.HasWritableResource(f);
-                    if (!canWrite) ImGui.BeginDisabled();
-                    if (ImGui.SmallButton($"Save As##saveas{shown}_{f.Path}")) RequestSaveAs?.Invoke(f);
-                    if (!canWrite) ImGui.EndDisabled();
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip(canWrite
-                            ? (f.ReadOnly
-                                ? "Save As... - this prop came from the game archives; this writes\nit out as a new loose .ydr you can edit and ship."
-                                : "Save As... - write this prop to a new .ydr")
-                            : "Nothing here can be written to a .ydr.");
-
-                    ImGui.SameLine();
-                    if (DangerButton($"del##close{shown}_{f.Path}", Vector2.Zero)) toClose = f;
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip(Scene.IsUnsaved(f)
-                            ? "Take this prop out of the scene. IT HAS UNSAVED CHANGES - save it first if you want them."
-                            : "Take this prop out of the scene, with its lights. The file on disk is not touched.");
-
                     if (ImGui.BeginPopupContextItem($"propmenu{shown}_{f.Path}"))
                     {
                         bool unsaved = Scene.IsUnsaved(f);
@@ -4319,12 +4307,26 @@ namespace RageLightEditor.Editor
                                 catch (Exception ex) { scene.LoadError = ex.Message; }
                             }
                         }
-                        if (ImGui.MenuItem("Save As...")) RequestSaveAs?.Invoke(f);
+                        if (ImGui.MenuItem("Save As...", null, false, Scene.HasWritableResource(f))) RequestSaveAs?.Invoke(f);
                         if (ImGui.MenuItem(f.Visible ? "Hide" : "Show")) f.Visible = !f.Visible;
                         ImGui.Separator();
                         if (ImGui.MenuItem("Close")) toClose = f;
                         ImGui.EndPopup();
                     }
+                    ImGui.SameLine();
+                    ImGui.TextDisabled($"({lc})");
+                    ImGui.SameLine();
+                    if (ImGui.SmallButton($"{(f.Visible ? "hide" : "show")}##vis{shown}_{f.Path}"))
+                    {
+                        f.Visible = !f.Visible;
+                    }
+                    ImGui.SameLine();
+                    if (SmallDangerButton_U56($"del##close{shown}_{f.Path}")) toClose = f;
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip(Scene.IsUnsaved(f)
+                            ? "Take this prop out of the scene. IT HAS UNSAVED CHANGES - save it first if you want them."
+                            : "Take this prop out of the scene, with its lights. The file on disk is not touched.");
+
                 }
                 if (scroll)
                 {
